@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CameraController;
 use App\Http\Controllers\Api\ChatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,4 +17,8 @@ Route::prefix('chat')->middleware('throttle:chat')->group(function () {
 
 Route::prefix('chat')->middleware('throttle:120,1')->group(function () {
     Route::get('/poll', [ChatController::class, 'poll']);
+});
+
+Route::prefix('cameras')->middleware('throttle:60,1')->group(function () {
+    Route::get('/schedule', [CameraController::class, 'schedule']);
 });

@@ -17,12 +17,17 @@ use App\Livewire\Admin\BlockedVisitors;
 use App\Livewire\Admin\ChatList;
 use App\Livewire\Admin\ChatView;
 use App\Livewire\Admin\ContentBlocks;
+use App\Livewire\Admin\Cameras as AdminCameras;
+use App\Livewire\Admin\CameraPlanner;
+use App\Livewire\Admin\CameraSettings;
+use App\Livewire\Cameras\Index as CameraIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', Home::class)->name('home');
 Route::get('/personages', CharacterIndex::class)->name('characters.index');
 Route::get('/episodes', EpisodeShow::class)->name('episodes.index');
 Route::get('/blog', Blog::class)->name('blog');
+Route::get('/cameras', CameraIndex::class)->name('cameras.index');
 
 Route::get('/admin/login', AdminLogin::class)->middleware('guest')->name('admin.login');
 
@@ -45,5 +50,8 @@ Route::middleware([
         Route::get('/admin/chats/blocked', BlockedVisitors::class)->name('admin.chats.blocked');
         Route::get('/admin/chats/{conversation}', ChatView::class)->name('admin.chats.view');
         Route::get('/admin/content-blocks', ContentBlocks::class)->name('admin.content-blocks');
+        Route::get('/admin/cameras', AdminCameras::class)->name('admin.cameras');
+        Route::get('/admin/cameras/settings', CameraSettings::class)->name('admin.camera-settings');
+        Route::get('/admin/cameras/{camera}/planner', CameraPlanner::class)->name('admin.camera-planner');
     });
 });

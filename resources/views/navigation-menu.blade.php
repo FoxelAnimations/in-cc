@@ -15,6 +15,7 @@
                 <a href="{{ route('episodes.index') }}" class="{{ request()->routeIs('episodes.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">AFLEVERINGEN</a>
                 <a href="{{ route('characters.index') }}" class="{{ request()->routeIs('characters.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">PERSONAGES</a>
                 <a href="{{ route('blog') }}" class="{{ request()->routeIs('blog') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">BLOG</a>
+                <a href="{{ route('cameras.index') }}" class="{{ request()->routeIs('cameras.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">CAMERA'S</a>
                 @auth
                     @can('access-admin')
                         <a href="{{ route('admin.dashboard') }}" class="text-[#E7FF57] text-lg tracking-widest transition hover:brightness-90">ADMIN</a>
@@ -58,6 +59,7 @@
             <a href="{{ route('episodes.index') }}" class="block px-4 py-2 {{ request()->routeIs('episodes.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest hover:text-[#E7FF57] transition">AFLEVERINGEN</a>
             <a href="{{ route('characters.index') }}" class="block px-4 py-2 {{ request()->routeIs('characters.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest hover:text-[#E7FF57] transition">PERSONAGES</a>
             <a href="{{ route('blog') }}" class="block px-4 py-2 {{ request()->routeIs('blog') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest hover:text-[#E7FF57] transition">BLOG</a>
+            <a href="{{ route('cameras.index') }}" class="block px-4 py-2 {{ request()->routeIs('cameras.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest hover:text-[#E7FF57] transition">CAMERA'S</a>
             @auth
                 @can('access-admin')
                     <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-[#E7FF57] text-lg tracking-widest hover:brightness-90 transition">ADMIN</a>
