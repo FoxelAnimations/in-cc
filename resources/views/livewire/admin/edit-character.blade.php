@@ -21,6 +21,23 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="mb-6 rounded-sm bg-red-500/10 border border-red-500/30 px-4 py-3 text-sm text-red-400">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="mb-6 rounded-sm bg-red-500/10 border border-red-500/30 px-4 py-3">
+                <p class="text-sm font-semibold text-red-400 mb-2">{{ __('Please fix the following errors:') }}</p>
+                <ul class="list-disc list-inside text-sm text-red-400 space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form wire:submit="save" class="space-y-6" enctype="multipart/form-data">
             {{-- Basic Info --}}
             <div class="rounded-sm bg-zinc-900 border border-zinc-800 p-6 space-y-6">
