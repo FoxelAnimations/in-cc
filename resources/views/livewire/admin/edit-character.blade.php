@@ -188,6 +188,24 @@
                                 @endif
                             </div>
                         </div>
+                        {{-- Animated --}}
+                        <div class="col-span-2 mt-2">
+                            <label class="block text-[11px] uppercase tracking-wider text-zinc-500 mb-1">{{ __('Animated (GIF or WebM)') }}</label>
+                            <input type="file" wire:model="full_body_image_animated" accept=".gif,.webm" class="block w-full text-xs text-zinc-400 file:mr-2 file:rounded-sm file:border-0 file:bg-zinc-800 file:py-1.5 file:px-3 file:text-xs file:font-medium file:text-white hover:file:bg-zinc-700" />
+                            <p class="mt-1 text-[10px] text-zinc-600">{{ __('Plays when character is centered in carousel. Max 10MB.') }}</p>
+                            @error('full_body_image_animated') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                            @if ($full_body_image_animated)
+                                <div class="mt-2 relative inline-block rounded-sm border border-zinc-700 p-2">
+                                    <p class="text-xs text-zinc-400">{{ $full_body_image_animated->getClientOriginalName() }}</p>
+                                    <button type="button" wire:click="$set('full_body_image_animated', null)" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] hover:bg-red-500">&times;</button>
+                                </div>
+                            @elseif($character->full_body_image_animated_path)
+                                <div class="mt-2 relative inline-block rounded-sm border border-zinc-700 p-2">
+                                    <p class="text-xs text-zinc-400">{{ basename($character->full_body_image_animated_path) }}</p>
+                                    <button type="button" wire:click="removeImage('full_body_image_animated_path')" wire:confirm="{{ __('Remove this file?') }}" class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] hover:bg-red-500">&times;</button>
+                                </div>
+                            @endif
+                        </div>
                     </div>
 
                     {{-- Profile Photo --}}

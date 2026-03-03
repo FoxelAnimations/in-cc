@@ -9,6 +9,7 @@ class Episode extends Model
 {
     protected $fillable = [
         'title',
+        'category',
         'description',
         'source_type',
         'video_path',
@@ -20,12 +21,14 @@ class Episode extends Model
         'twitter_url',
         'sort_order',
         'age_restricted',
+        'visible',
     ];
 
     protected function casts(): array
     {
         return [
             'age_restricted' => 'boolean',
+            'visible' => 'boolean',
         ];
     }
 

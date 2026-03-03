@@ -35,7 +35,7 @@
 /* Character Carousel */
 .character-carousel {
     overflow: hidden;
-    padding: 2rem 0 1rem;
+    padding: 2rem 0 1.5rem;
 }
 
 .character-carousel .swiper-slide {
@@ -45,9 +45,21 @@
     justify-content: center;
 }
 
-.character-carousel .swiper-slide img {
+.character-carousel .swiper-slide img,
+.character-carousel .swiper-slide video {
     object-fit: contain;
     object-position: bottom center;
     user-select: none;
     -webkit-user-drag: none;
+}
+
+/* Entrance animation: hide slides until ready */
+.carousel-entering .swiper-slide {
+    opacity: 0 !important;
+    transform: scale(1.4) !important;
+}
+
+/* Animated overlay layer */
+.character-animated-layer {
+    pointer-events: none;
 }

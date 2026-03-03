@@ -52,6 +52,7 @@
                             <tr>
                                 <th class="w-10 px-3 py-3"></th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Title') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Category') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Type') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Characters') }}</th>
                                 <th class="px-6 py-3 text-right text-xs font-semibold text-zinc-500 uppercase tracking-wider">{{ __('Actions') }}</th>
@@ -66,6 +67,9 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-2">
                                             <span class="font-semibold text-white">{{ $episode->title }}</span>
+                                            @if (!$episode->visible)
+                                                <span class="inline-flex px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-zinc-700/30 text-zinc-500 rounded-sm">{{ __('Hidden') }}</span>
+                                            @endif
                                             @if ($episode->age_restricted)
                                                 <span class="inline-flex px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-red-900/30 text-red-400 rounded-sm">18+</span>
                                             @endif
@@ -73,6 +77,11 @@
                                         @if ($episode->description)
                                             <div class="text-xs text-zinc-500 max-w-xs truncate">{{ \Illuminate\Support\Str::limit($episode->description, 60) }}</div>
                                         @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold uppercase tracking-wider {{ $episode->category === 'episode' ? 'bg-blue-900/30 text-blue-400' : ($episode->category === 'short' ? 'bg-purple-900/30 text-purple-400' : 'bg-emerald-900/30 text-emerald-400') }}">
+                                            {{ $episode->category }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex px-2 py-1 text-xs font-semibold uppercase tracking-wider {{ $episode->isYoutube() ? 'bg-red-900/30 text-red-400' : 'bg-accent/10 text-accent' }}">
@@ -139,6 +148,25 @@
                             @error('title') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
+                        {{-- Category --}}
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-zinc-400 mb-2">{{ __('Category') }} *</label>
+                            <div class="flex gap-2">
+                                <button type="button" wire:click="$set('category', 'episode')"
+                                    class="px-4 py-2 text-sm font-semibold uppercase tracking-wider transition {{ $category === 'episode' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white' }}">
+                                    {{ __('Episode') }}
+                                </button>
+                                <button type="button" wire:click="$set('category', 'short')"
+                                    class="px-4 py-2 text-sm font-semibold uppercase tracking-wider transition {{ $category === 'short' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white' }}">
+                                    {{ __('Short') }}
+                                </button>
+                                <button type="button" wire:click="$set('category', 'mini')"
+                                    class="px-4 py-2 text-sm font-semibold uppercase tracking-wider transition {{ $category === 'mini' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white' }}">
+                                    {{ __('Mini') }}
+                                </button>
+                            </div>
+                        </div>
+
                         {{-- Description --}}
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-zinc-400 mb-1">{{ __('Description') }}</label>
@@ -195,6 +223,15 @@
                                 <span class="text-sm font-medium text-white">{{ __('18+ Age Gate') }}</span>
                             </label>
                             <p class="text-xs text-zinc-500 mt-1">{{ __('When enabled, viewers must confirm their age before watching this episode.') }}</p>
+                        </div>
+
+                        {{-- Visible Toggle --}}
+                        <div class="mb-4">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" wire:model="visible" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
+                                <span class="text-sm font-medium text-white">{{ __('Visible on site') }}</span>
+                            </label>
+                            <p class="text-xs text-zinc-500 mt-1">{{ __('When disabled, this episode will not be shown on the homepage or episodes page.') }}</p>
                         </div>
 
                         {{-- Characters Multi-Select --}}

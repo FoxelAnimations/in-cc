@@ -30,6 +30,7 @@ class Character extends Model
         'profile_image_hover_path',
         'full_body_image_path',
         'full_body_image_hover_path',
+        'full_body_image_animated_path',
         'profile_photo_path',
         'profile_photo_hover_path',
         'chat_image_path',

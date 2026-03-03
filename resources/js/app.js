@@ -12,7 +12,10 @@ function initCharacterCarousel() {
     const el = document.querySelector('.character-carousel');
     if (!el || el.swiper) return;
 
-    new Swiper(el, {
+    let entranceComplete = false;
+    let entranceTriggered = false;
+
+    const swiper = new Swiper(el, {
         slidesPerView: 3,
         slidesPerGroup: 1,
         centeredSlides: true,
@@ -21,16 +24,13 @@ function initCharacterCarousel() {
         spaceBetween: 12,
         speed: 750,
         watchSlidesProgress: true,
+        simulateTouch: true,
+        touchEventsTarget: 'container',
+        passiveListeners: true,
 
         breakpoints: {
-            768: {
-                slidesPerView: 5,
-                spaceBetween: 16,
-            },
-            1024: {
-                slidesPerView: 7,
-                spaceBetween: 16,
-            },
+            768: { slidesPerView: 5, spaceBetween: 16 },
+            1024: { slidesPerView: 7, spaceBetween: 16 },
         },
 
         on: {
@@ -38,20 +38,159 @@ function initCharacterCarousel() {
                 for (let i = 0; i < swiper.slides.length; i++) {
                     const slide = swiper.slides[i];
                     const absProgress = Math.min(Math.abs(slide.progress), 3);
-                    const scale = Math.max(1 - absProgress * 0.25, 0.4);
-                    const opacity = Math.max(1 - absProgress * 0.5, 0.08);
-                    slide.style.transform = `scale(${scale})`;
-                    slide.style.opacity = opacity;
+
+                    // Hill-shaped curve: flat plateau near center, steepens outward
+                    const scale = Math.max(1 - Math.pow(absProgress, 1.5) * 0.22, 0.4);
+                    const opacity = Math.max(1 - Math.pow(absProgress, 1.5) * 0.45, 0.08);
+
+                    if (entranceComplete) {
+                        slide.style.transform = `scale(${scale})`;
+                        slide.style.opacity = opacity;
+
+                        // Animated layer: show when selected (center)
+                        const animatedEl = slide.querySelector('.character-animated-layer');
+                        if (animatedEl) {
+                            const isSelected = absProgress < 0.5;
+                            const wasSelected = slide.dataset.wasSelected === 'true';
+
+                            if (isSelected && !wasSelected) {
+                                // Became selected: show animated, hide static
+                                animatedEl.style.opacity = '1';
+                                const staticImg = slide.querySelector('.character-static-img');
+                                if (staticImg) staticImg.style.opacity = '0';
+                                const hoverImg = slide.querySelector('.character-hover-img');
+                                if (hoverImg) hoverImg.style.opacity = '0';
+
+                                // Play animation
+                                if (animatedEl.tagName === 'VIDEO') {
+                                    animatedEl.currentTime = 0;
+                                    animatedEl.play().catch(() => {});
+                                } else {
+                                    // GIF: reset src to replay
+                                    const src = animatedEl.src;
+                                    animatedEl.src = '';
+                                    animatedEl.offsetHeight;
+                                    animatedEl.src = src;
+                                }
+                            } else if (!isSelected && wasSelected) {
+                                // Left center: hide animated, restore static
+                                animatedEl.style.opacity = '0.01';
+                                const staticImg = slide.querySelector('.character-static-img');
+                                if (staticImg) staticImg.style.opacity = '';
+                                const hoverImg = slide.querySelector('.character-hover-img');
+                                if (hoverImg) hoverImg.style.opacity = '';
+                            }
+
+                            slide.dataset.wasSelected = isSelected ? 'true' : 'false';
+                        }
+                    } else {
+                        // Store targets for entrance animation
+                        slide.dataset.targetScale = scale;
+                        slide.dataset.targetOpacity = opacity;
+                    }
                 }
             },
             setTransition(swiper, duration) {
+                if (!entranceComplete) return;
                 for (let i = 0; i < swiper.slides.length; i++) {
                     swiper.slides[i].style.transitionDuration = `${duration}ms`;
                 }
             },
         },
     });
+
+    // ─── Entrance Animation ─────────────────────────────────────
+    function triggerEntrance() {
+        if (entranceTriggered) return;
+        entranceTriggered = true;
+
+        const slides = swiper.slides;
+        let maxDelay = 0;
+
+        for (let i = 0; i < slides.length; i++) {
+            const slide = slides[i];
+            const distFromCenter = Math.abs(slide.progress);
+            const staggerDelay = Math.round(distFromCenter * 75);
+            if (staggerDelay > maxDelay) maxDelay = staggerDelay;
+
+            const targetScale = parseFloat(slide.dataset.targetScale) || 1;
+            const targetOpacity = parseFloat(slide.dataset.targetOpacity) || 1;
+
+            // Start: invisible, 1.4x enlarged relative to target
+            slide.style.transform = `scale(${targetScale * 1.4})`;
+            slide.style.opacity = '0';
+            slide.style.transition = 'none';
+            slide.offsetHeight; // force reflow
+
+            // Animate to target
+            slide.style.transition = `transform 650ms cubic-bezier(0.25, 0.1, 0.25, 1) ${staggerDelay}ms, opacity 650ms cubic-bezier(0.25, 0.1, 0.25, 1) ${staggerDelay}ms`;
+            slide.style.transform = `scale(${targetScale})`;
+            slide.style.opacity = targetOpacity;
+        }
+
+        // Remove .carousel-entering so CSS override stops
+        el.classList.remove('carousel-entering');
+
+        // After animation finishes, hand control to Swiper
+        setTimeout(() => {
+            entranceComplete = true;
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.transition = '';
+                delete slides[i].dataset.targetScale;
+                delete slides[i].dataset.targetOpacity;
+            }
+            swiper.update();
+        }, maxDelay + 700);
+    }
+
+    // Wait for images to load, or max 2 seconds
+    const images = el.querySelectorAll('img[loading="eager"]');
+    let loadedCount = 0;
+    const totalImages = images.length;
+    const maxWait = setTimeout(triggerEntrance, 2000);
+
+    function onImageReady() {
+        loadedCount++;
+        if (loadedCount >= totalImages) {
+            clearTimeout(maxWait);
+            triggerEntrance();
+        }
+    }
+
+    images.forEach(img => {
+        if (img.complete) {
+            onImageReady();
+        } else {
+            img.addEventListener('load', onImageReady, { once: true });
+            img.addEventListener('error', onImageReady, { once: true });
+        }
+    });
+
+    // Fallback if no images at all
+    if (totalImages === 0) {
+        clearTimeout(maxWait);
+        triggerEntrance();
+    }
 }
 
-document.addEventListener('DOMContentLoaded', initCharacterCarousel);
-document.addEventListener('livewire:navigated', initCharacterCarousel);
+// ─── Episode Category Carousels (Swiper) ─────────────────────
+function initEpisodeCarousels() {
+    document.querySelectorAll('.episode-carousel').forEach(el => {
+        if (el.swiper) return;
+        new Swiper(el, {
+            slidesPerView: 2,
+            slidesPerGroup: 1,
+            spaceBetween: 12,
+            grabCursor: true,
+            speed: 500,
+            breakpoints: {
+                640: { slidesPerView: 3, spaceBetween: 16 },
+                1024: { slidesPerView: 4, spaceBetween: 16 },
+                1280: { slidesPerView: 5, spaceBetween: 16 },
+            },
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => { initCharacterCarousel(); initEpisodeCarousels(); });
+document.addEventListener('livewire:navigated', () => { initCharacterCarousel(); initEpisodeCarousels(); });

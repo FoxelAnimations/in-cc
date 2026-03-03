@@ -14,6 +14,7 @@ class Episodes extends Component
     use WithFileUploads;
 
     public $title = '';
+    public $category = 'episode';
     public $description = '';
     public $source_type = 'upload';
     public $video;
@@ -25,6 +26,7 @@ class Episodes extends Component
     public $twitter_url = '';
     public $selectedCharacters = [];
     public bool $age_restricted = false;
+    public bool $visible = true;
 
     public ?int $editingId = null;
     public bool $showModal = false;
@@ -33,6 +35,7 @@ class Episodes extends Component
     {
         $rules = [
             'title' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'in:episode,short,mini'],
             'description' => ['nullable', 'string'],
             'source_type' => ['required', 'in:upload,youtube'],
             'thumbnail' => ['nullable', 'image', 'max:2048'],
@@ -41,6 +44,7 @@ class Episodes extends Component
             'tiktok_url' => ['nullable', 'url', 'max:255'],
             'twitter_url' => ['nullable', 'url', 'max:255'],
             'age_restricted' => ['boolean'],
+            'visible' => ['boolean'],
             'selectedCharacters' => ['array'],
             'selectedCharacters.*' => ['exists:characters,id'],
         ];
@@ -93,6 +97,7 @@ class Episodes extends Component
 
             $episode = Episode::create([
                 'title' => $validated['title'],
+                'category' => $validated['category'],
                 'description' => $validated['description'] ?? null,
                 'source_type' => $validated['source_type'],
                 'video_path' => $videoPath,
@@ -103,6 +108,7 @@ class Episodes extends Component
                 'tiktok_url' => $validated['tiktok_url'] ?: null,
                 'twitter_url' => $validated['twitter_url'] ?: null,
                 'age_restricted' => $validated['age_restricted'],
+                'visible' => $validated['visible'],
             ]);
 
             $episode->characters()->sync($this->selectedCharacters);
@@ -119,6 +125,7 @@ class Episodes extends Component
 
         $this->editingId = $episode->id;
         $this->title = $episode->title;
+        $this->category = $episode->category ?? 'episode';
         $this->description = $episode->description ?? '';
         $this->source_type = $episode->source_type;
         $this->youtube_url = $episode->youtube_url ?? '';
@@ -127,6 +134,7 @@ class Episodes extends Component
         $this->tiktok_url = $episode->tiktok_url ?? '';
         $this->twitter_url = $episode->twitter_url ?? '';
         $this->age_restricted = $episode->age_restricted ?? false;
+        $this->visible = $episode->visible ?? true;
         $this->selectedCharacters = $episode->characters->pluck('id')->toArray();
         $this->video = null;
         $this->thumbnail = null;
@@ -142,6 +150,7 @@ class Episodes extends Component
         DB::transaction(function () use ($validated, $episode) {
             $data = [
                 'title' => $validated['title'],
+                'category' => $validated['category'],
                 'description' => $validated['description'] ?? null,
                 'source_type' => $validated['source_type'],
                 'instagram_url' => $validated['instagram_url'] ?: null,
@@ -149,6 +158,7 @@ class Episodes extends Component
                 'tiktok_url' => $validated['tiktok_url'] ?: null,
                 'twitter_url' => $validated['twitter_url'] ?: null,
                 'age_restricted' => $validated['age_restricted'],
+                'visible' => $validated['visible'],
             ];
 
             if ($this->source_type === 'youtube') {
@@ -207,11 +217,13 @@ class Episodes extends Component
     public function resetForm(): void
     {
         $this->reset([
-            'title', 'description', 'source_type', 'video', 'youtube_url',
+            'title', 'category', 'description', 'source_type', 'video', 'youtube_url',
             'thumbnail', 'instagram_url', 'youtube_link', 'tiktok_url',
-            'twitter_url', 'selectedCharacters', 'age_restricted', 'editingId', 'showModal',
+            'twitter_url', 'selectedCharacters', 'age_restricted', 'visible', 'editingId', 'showModal',
         ]);
+        $this->category = 'episode';
         $this->source_type = 'upload';
+        $this->visible = true;
     }
 
     public function render()

@@ -5,32 +5,57 @@
          ============================================================ --}}
     @if ($characters->count() >= 1)
         <section class="w-full overflow-hidden bg-black" wire:ignore>
-            <div class="character-carousel swiper">
+            <div class="character-carousel carousel-entering swiper">
                 @php
-                    // Repeat characters so there are enough slides for looping (need ≥10 for desktop)
+                    // Repeat characters for looping + overscroll (5 extra per side)
                     $slides = $characters;
-                    while ($slides->count() < 10) {
+                    while ($slides->count() < 20) {
                         $slides = $slides->concat($characters);
                     }
                 @endphp
                 <div class="swiper-wrapper">
                     @foreach ($slides as $character)
                         <div class="swiper-slide group">
+                            {{-- Static image --}}
                             <img
                                 src="{{ Storage::url($character->full_body_image_path) }}"
                                 alt="{{ $character->first_name }}"
-                                class="w-full max-h-56 sm:max-h-64 md:max-h-72 lg:max-h-80 transition-opacity duration-300 {{ $character->full_body_image_hover_path ? 'group-hover:opacity-0' : '' }}"
+                                class="w-full max-h-56 sm:max-h-64 md:max-h-80 lg:max-h-[370px] character-static-img"
                                 loading="eager"
                                 draggable="false"
                             />
+                            {{-- Hover image --}}
                             @if ($character->full_body_image_hover_path)
                                 <img
                                     src="{{ Storage::url($character->full_body_image_hover_path) }}"
                                     alt="{{ $character->first_name }}"
-                                    class="w-full max-h-56 sm:max-h-64 md:max-h-72 lg:max-h-80 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                    class="w-full max-h-56 sm:max-h-64 md:max-h-80 lg:max-h-[370px] absolute inset-0 m-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300 character-hover-img"
                                     loading="eager"
                                     draggable="false"
                                 />
+                            @endif
+                            {{-- Animated layer (gif/webm) --}}
+                            @if ($character->full_body_image_animated_path)
+                                @if (str_ends_with($character->full_body_image_animated_path, '.webm'))
+                                    <video
+                                        src="{{ Storage::url($character->full_body_image_animated_path) }}"
+                                        class="w-full max-h-56 sm:max-h-64 md:max-h-80 lg:max-h-[370px] absolute inset-0 m-auto character-animated-layer"
+                                        style="opacity: 0.01;"
+                                        muted
+                                        playsinline
+                                        preload="auto"
+                                        draggable="false"
+                                    ></video>
+                                @else
+                                    <img
+                                        src="{{ Storage::url($character->full_body_image_animated_path) }}"
+                                        alt="{{ $character->first_name }} animated"
+                                        class="w-full max-h-56 sm:max-h-64 md:max-h-80 lg:max-h-[370px] absolute inset-0 m-auto character-animated-layer"
+                                        style="opacity: 0.01;"
+                                        loading="eager"
+                                        draggable="false"
+                                    />
+                                @endif
                             @endif
                         </div>
                     @endforeach
@@ -109,9 +134,9 @@
     </section>
 
     {{-- ============================================================
-         LATEST EPISODES SECTION
+         AFLEVERINGEN SECTIONS (Episodes, Shorts, Minis)
          ============================================================ --}}
-    <section id="episodes" class="py-8 md:py-12 scroll-mt-16"
+    <div id="episodes"
         x-data="{
             epOpen: false,
             ep: null,
@@ -122,58 +147,77 @@
         }"
         @keydown.escape.window="closeEp()"
     >
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl md:text-4xl font-bold uppercase text-center tracking-wider mb-6">
-                Afleveringen
-            </h2>
+        @foreach ([
+            ['items' => $latestEpisodes, 'title' => 'Episodes'],
+            ['items' => $latestShorts, 'title' => 'Shorts'],
+            ['items' => $latestMinis, 'title' => 'Minis'],
+        ] as $section)
+            @if ($section['items']->isNotEmpty())
+                <section class="py-8 md:py-12 scroll-mt-16">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 class="text-3xl md:text-4xl font-bold uppercase text-center tracking-wider mb-6">
+                            {{ $section['title'] }}
+                        </h2>
 
-            @if ($latestEpisodes->isNotEmpty())
-                <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-                    @foreach ($latestEpisodes as $episode)
-                        <div
-                            class="group border border-zinc-800 bg-zinc-900 rounded-sm overflow-hidden transition hover:border-accent cursor-pointer"
-                            @click="showEp({
-                                title: {{ Js::from($episode->title) }},
-                                description: {{ Js::from($episode->description) }},
-                                sourceType: {{ Js::from($episode->source_type) }},
-                                videoUrl: {{ Js::from($episode->videoUrl()) }},
-                                youtubeEmbed: {{ Js::from($episode->youtubeEmbedUrl()) }},
-                                thumbnail: {{ Js::from($episode->thumbnailUrl()) }},
-                                instagram: {{ Js::from($episode->instagram_url) }},
-                                youtube: {{ Js::from($episode->youtube_link) }},
-                                tiktok: {{ Js::from($episode->tiktok_url) }},
-                                twitter: {{ Js::from($episode->twitter_url) }},
-                                ageRestricted: {{ Js::from((bool) $episode->age_restricted) }},
-                            })"
-                        >
-                            <div class="relative aspect-video bg-zinc-800 overflow-hidden">
-                                @if ($episode->thumbnailUrl())
-                                    <img src="{{ $episode->thumbnailUrl() }}" alt="{{ $episode->title }}" class="w-full h-full object-cover transition group-hover:scale-105 duration-300">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-zinc-700">
-                                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="episode-carousel swiper" wire:ignore>
+                            <div class="swiper-wrapper">
+                                @foreach ($section['items'] as $episode)
+                                    <div class="swiper-slide">
+                                        <div
+                                            class="group border border-zinc-800 bg-zinc-900 rounded-sm overflow-hidden transition hover:border-accent cursor-pointer"
+                                            @click="showEp({
+                                                title: {{ Js::from($episode->title) }},
+                                                description: {{ Js::from($episode->description) }},
+                                                sourceType: {{ Js::from($episode->source_type) }},
+                                                videoUrl: {{ Js::from($episode->videoUrl()) }},
+                                                youtubeEmbed: {{ Js::from($episode->youtubeEmbedUrl()) }},
+                                                thumbnail: {{ Js::from($episode->thumbnailUrl()) }},
+                                                instagram: {{ Js::from($episode->instagram_url) }},
+                                                youtube: {{ Js::from($episode->youtube_link) }},
+                                                tiktok: {{ Js::from($episode->tiktok_url) }},
+                                                twitter: {{ Js::from($episode->twitter_url) }},
+                                                ageRestricted: {{ Js::from((bool) $episode->age_restricted) }},
+                                            })"
+                                        >
+                                            <div class="relative aspect-video bg-zinc-800 overflow-hidden">
+                                                @if ($episode->thumbnailUrl())
+                                                    <img src="{{ $episode->thumbnailUrl() }}" alt="{{ $episode->title }}" class="w-full h-full object-cover transition group-hover:scale-105 duration-300">
+                                                @else
+                                                    <div class="w-full h-full flex items-center justify-center text-zinc-700">
+                                                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    </div>
+                                                @endif
+                                                <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
+                                                    <svg class="w-8 h-8 text-accent" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                                </div>
+                                            </div>
+                                            <div class="p-2">
+                                                <h3 class="text-xs font-bold uppercase tracking-wider truncate">{{ $episode->title }}</h3>
+                                            </div>
+                                        </div>
                                     </div>
-                                @endif
-                                <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
-                                    <svg class="w-8 h-8 text-accent" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                </div>
-                            </div>
-                            <div class="p-2">
-                                <h3 class="text-xs font-bold uppercase tracking-wider truncate">{{ $episode->title }}</h3>
+                                @endforeach
                             </div>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                </section>
+            @endif
+        @endforeach
 
-                <div class="text-center mt-6">
+        {{-- "View All" button --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            @if ($latestEpisodes->isNotEmpty() || $latestShorts->isNotEmpty() || $latestMinis->isNotEmpty())
+                <div class="text-center mt-2 mb-8">
                     <a href="{{ route('episodes.index') }}" class="inline-flex items-center bg-accent text-black px-6 py-3 text-lg font-bold uppercase tracking-wider transition hover:brightness-90">
                         {{ __('Bekijk Alle Afleveringen') }}
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                     </a>
                 </div>
             @else
-                <div class="border border-zinc-800 bg-zinc-900 rounded-sm p-8 md:p-12 flex items-center justify-center min-h-[150px]">
-                    <p class="text-zinc-600 text-xl uppercase tracking-widest">{{ __('Binnenkort') }}</p>
+                <div class="py-8 md:py-12">
+                    <div class="border border-zinc-800 bg-zinc-900 rounded-sm p-8 md:p-12 flex items-center justify-center min-h-[150px]">
+                        <p class="text-zinc-600 text-xl uppercase tracking-widest">{{ __('Binnenkort') }}</p>
+                    </div>
                 </div>
             @endif
         </div>
@@ -254,7 +298,7 @@
                 </div>
             </div>
         </template>
-    </section>
+    </div>
 
     {{-- ============================================================
          CONTENT BLOCKS SECTION

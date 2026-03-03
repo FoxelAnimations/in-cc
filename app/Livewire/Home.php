@@ -18,10 +18,12 @@ class Home extends Component
         return view('livewire.home', [
             'characters' => Character::whereNotNull('full_body_image_path')
                 ->orderBy('sort_order')
-                ->get(['id', 'first_name', 'last_name', 'full_body_image_path', 'full_body_image_hover_path']),
+                ->get(['id', 'first_name', 'last_name', 'full_body_image_path', 'full_body_image_hover_path', 'full_body_image_animated_path']),
             'heroVideo' => HeroVideo::latest()->first(),
             'heroContent' => HeroContent::first(),
-            'latestEpisodes' => Episode::with('characters')->latest()->take(5)->get(),
+            'latestEpisodes' => Episode::with('characters')->where('category', 'episode')->where('visible', true)->latest()->take(8)->get(),
+            'latestShorts' => Episode::with('characters')->where('category', 'short')->where('visible', true)->latest()->take(8)->get(),
+            'latestMinis' => Episode::with('characters')->where('category', 'mini')->where('visible', true)->latest()->take(8)->get(),
             'socialLinks' => SocialLink::whereNotNull('url')->where('url', '!=', '')->orderBy('sort_order')->get(),
             'contentBlocks' => ContentBlock::active()->forHome()->get(),
             'ageGate' => AgeGate::first(),

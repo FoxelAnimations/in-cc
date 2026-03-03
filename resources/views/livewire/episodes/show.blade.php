@@ -29,80 +29,109 @@
     }"
     @keydown.escape.window="charOpen ? closeChar() : close()"
 >
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20"
+        x-data="{ tab: 'episodes' }"
+    >
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold uppercase text-center tracking-wider mb-10">
             Afleveringen
         </h1>
 
-        @if ($episodes->isEmpty())
-            <p class="text-center text-zinc-600 text-lg">{{ __('Nog geen afleveringen.') }}</p>
-        @else
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($episodes as $episode)
-                    <div
-                        class="group cursor-pointer border border-zinc-800 bg-zinc-900 rounded-sm overflow-hidden transition hover:border-accent"
-                        @click="openEpisode({
-                            id: {{ $episode->id }},
-                            title: {{ Js::from($episode->title) }},
-                            description: {{ Js::from($episode->description) }},
-                            isYoutube: {{ $episode->isYoutube() ? 'true' : 'false' }},
-                            embedUrl: {{ Js::from($episode->youtubeEmbedUrl()) }},
-                            videoUrl: {{ Js::from($episode->videoUrl()) }},
-                            characters: {{ Js::from($episode->characters->map(fn($c) => [
-                                'name' => $c->full_name,
-                                'nickname' => $c->nick_name,
-                                'job' => $c->job?->title,
-                                'bio' => $c->bio,
-                                'image' => $c->profile_image_path ? Storage::url($c->profile_image_path) : null,
-                                'fullBody' => $c->full_body_image_path ? Storage::url($c->full_body_image_path) : null,
-                            ])) }},
-                            instagram: {{ Js::from($episode->instagram_url) }},
-                            youtube: {{ Js::from($episode->youtube_link) }},
-                            tiktok: {{ Js::from($episode->tiktok_url) }},
-                            twitter: {{ Js::from($episode->twitter_url) }},
-                            ageRestricted: {{ Js::from((bool) $episode->age_restricted) }},
-                        })"
-                    >
-                        {{-- Thumbnail --}}
-                        <div class="relative aspect-video bg-zinc-800 overflow-hidden">
-                            @if ($episode->thumbnailUrl())
-                                <img src="{{ $episode->thumbnailUrl() }}" alt="{{ $episode->title }}" class="w-full h-full object-cover transition group-hover:scale-105 duration-300">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-zinc-700">
-                                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                </div>
-                            @endif
-                            <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
-                                <svg class="w-14 h-14 text-accent" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            </div>
-                            <div class="absolute top-2 right-2 flex gap-1">
-                                @if ($episode->age_restricted)
-                                    <span class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-red-600 text-white">18+</span>
-                                @endif
-                                <span class="px-2 py-0.5 text-xs font-semibold uppercase tracking-wider {{ $episode->isYoutube() ? 'bg-red-600 text-white' : 'bg-accent text-black' }}">
-                                    {{ $episode->source_type }}
-                                </span>
-                            </div>
-                        </div>
+        {{-- Tabs --}}
+        <div class="flex justify-center gap-2 mb-10">
+            <button @click="tab = 'episodes'"
+                :class="tab === 'episodes' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white'"
+                class="px-6 py-2.5 text-sm font-bold uppercase tracking-wider transition">
+                Episodes
+            </button>
+            <button @click="tab = 'shorts'"
+                :class="tab === 'shorts' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white'"
+                class="px-6 py-2.5 text-sm font-bold uppercase tracking-wider transition">
+                Shorts
+            </button>
+            <button @click="tab = 'minis'"
+                :class="tab === 'minis' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white'"
+                class="px-6 py-2.5 text-sm font-bold uppercase tracking-wider transition">
+                Minis
+            </button>
+        </div>
 
-                        {{-- Info --}}
-                        <div class="p-4">
-                            <h3 class="text-lg font-bold uppercase tracking-wider mb-1">{{ $episode->title }}</h3>
-                            @if ($episode->characters->isNotEmpty())
-                                <div class="flex flex-wrap gap-1 mb-2">
-                                    @foreach ($episode->characters as $char)
-                                        <span class="px-2 py-0.5 text-xs bg-zinc-800 text-accent rounded-sm">{{ $char->first_name }}</span>
-                                    @endforeach
+        @foreach ([
+            ['key' => 'episodes', 'items' => $episodes],
+            ['key' => 'shorts', 'items' => $shorts],
+            ['key' => 'minis', 'items' => $minis],
+        ] as $section)
+            <div x-show="tab === '{{ $section['key'] }}'" x-cloak>
+                @if ($section['items']->isEmpty())
+                    <p class="text-center text-zinc-600 text-lg">{{ __('Nog geen afleveringen.') }}</p>
+                @else
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach ($section['items'] as $episode)
+                            <div
+                                class="group cursor-pointer border border-zinc-800 bg-zinc-900 rounded-sm overflow-hidden transition hover:border-accent"
+                                @click="openEpisode({
+                                    id: {{ $episode->id }},
+                                    title: {{ Js::from($episode->title) }},
+                                    description: {{ Js::from($episode->description) }},
+                                    isYoutube: {{ $episode->isYoutube() ? 'true' : 'false' }},
+                                    embedUrl: {{ Js::from($episode->youtubeEmbedUrl()) }},
+                                    videoUrl: {{ Js::from($episode->videoUrl()) }},
+                                    characters: {{ Js::from($episode->characters->map(fn($c) => [
+                                        'name' => $c->full_name,
+                                        'nickname' => $c->nick_name,
+                                        'job' => $c->job?->title,
+                                        'bio' => $c->bio,
+                                        'image' => $c->profile_image_path ? Storage::url($c->profile_image_path) : null,
+                                        'fullBody' => $c->full_body_image_path ? Storage::url($c->full_body_image_path) : null,
+                                    ])) }},
+                                    instagram: {{ Js::from($episode->instagram_url) }},
+                                    youtube: {{ Js::from($episode->youtube_link) }},
+                                    tiktok: {{ Js::from($episode->tiktok_url) }},
+                                    twitter: {{ Js::from($episode->twitter_url) }},
+                                    ageRestricted: {{ Js::from((bool) $episode->age_restricted) }},
+                                })"
+                            >
+                                {{-- Thumbnail --}}
+                                <div class="relative aspect-video bg-zinc-800 overflow-hidden">
+                                    @if ($episode->thumbnailUrl())
+                                        <img src="{{ $episode->thumbnailUrl() }}" alt="{{ $episode->title }}" class="w-full h-full object-cover transition group-hover:scale-105 duration-300">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-zinc-700">
+                                            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </div>
+                                    @endif
+                                    <div class="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
+                                        <svg class="w-14 h-14 text-accent" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </div>
+                                    <div class="absolute top-2 right-2 flex gap-1">
+                                        @if ($episode->age_restricted)
+                                            <span class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-red-600 text-white">18+</span>
+                                        @endif
+                                        <span class="px-2 py-0.5 text-xs font-semibold uppercase tracking-wider {{ $episode->isYoutube() ? 'bg-red-600 text-white' : 'bg-accent text-black' }}">
+                                            {{ $episode->source_type }}
+                                        </span>
+                                    </div>
                                 </div>
-                            @endif
-                            @if ($episode->description)
-                                <p class="text-sm text-zinc-500 line-clamp-2">{{ Illuminate\Support\Str::limit($episode->description, 120) }}</p>
-                            @endif
-                        </div>
+
+                                {{-- Info --}}
+                                <div class="p-4">
+                                    <h3 class="text-lg font-bold uppercase tracking-wider mb-1">{{ $episode->title }}</h3>
+                                    @if ($episode->characters->isNotEmpty())
+                                        <div class="flex flex-wrap gap-1 mb-2">
+                                            @foreach ($episode->characters as $char)
+                                                <span class="px-2 py-0.5 text-xs bg-zinc-800 text-accent rounded-sm">{{ $char->first_name }}</span>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if ($episode->description)
+                                        <p class="text-sm text-zinc-500 line-clamp-2">{{ Illuminate\Support\Str::limit($episode->description, 120) }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                @endforeach
+                @endif
             </div>
-        @endif
+        @endforeach
     </section>
 
     {{-- ============================================================

@@ -36,6 +36,7 @@ class EditCharacter extends Component
     public $profile_image_hover;
     public $full_body_image;
     public $full_body_image_hover;
+    public $full_body_image_animated;
     public $profile_photo;
     public $profile_photo_hover;
     public $chat_image;
@@ -64,6 +65,7 @@ class EditCharacter extends Component
             'profile_image_hover' => ['nullable', 'image', 'max:2048'],
             'full_body_image' => ['nullable', 'image', 'max:2048'],
             'full_body_image_hover' => ['nullable', 'image', 'max:2048'],
+            'full_body_image_animated' => ['nullable', 'file', 'mimes:gif,webm', 'max:10240'],
             'profile_photo' => ['nullable', 'image', 'max:2048'],
             'profile_photo_hover' => ['nullable', 'image', 'max:2048'],
             'chat_image' => ['nullable', 'image', 'max:2048'],
@@ -90,6 +92,9 @@ class EditCharacter extends Component
                 }
                 if ($this->full_body_image_hover) {
                     $imageData['full_body_image_hover_path'] = $this->full_body_image_hover->store('characters/full-body', 'public');
+                }
+                if ($this->full_body_image_animated) {
+                    $imageData['full_body_image_animated_path'] = $this->full_body_image_animated->store('characters/full-body', 'public');
                 }
                 if ($this->profile_photo) {
                     $imageData['profile_photo_path'] = $this->profile_photo->store('characters/profile-photo', 'public');
@@ -194,6 +199,7 @@ class EditCharacter extends Component
             'profile_image_hover_path',
             'full_body_image_path',
             'full_body_image_hover_path',
+            'full_body_image_animated_path',
             'profile_photo_path',
             'profile_photo_hover_path',
             'chat_image_path',
