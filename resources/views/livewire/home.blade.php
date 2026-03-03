@@ -6,8 +6,15 @@
     @if ($characters->count() >= 1)
         <section class="w-full overflow-hidden bg-black" wire:ignore>
             <div class="character-carousel swiper">
+                @php
+                    // Repeat characters so there are enough slides for looping (need ≥10 for desktop)
+                    $slides = $characters;
+                    while ($slides->count() < 10) {
+                        $slides = $slides->concat($characters);
+                    }
+                @endphp
                 <div class="swiper-wrapper">
-                    @foreach ($characters as $character)
+                    @foreach ($slides as $character)
                         <div class="swiper-slide group">
                             <img
                                 src="{{ Storage::url($character->full_body_image_path) }}"

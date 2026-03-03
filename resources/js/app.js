@@ -12,14 +12,11 @@ function initCharacterCarousel() {
     const el = document.querySelector('.character-carousel');
     if (!el || el.swiper) return;
 
-    const slideCount = el.querySelectorAll('.swiper-slide').length;
-    const canLoop = slideCount >= 5;
-
     new Swiper(el, {
-        slidesPerView: Math.min(slideCount, 5),
-        slidesPerGroup: canLoop ? 2 : 1,
+        slidesPerView: 5,
+        slidesPerGroup: 2,
         centeredSlides: true,
-        loop: canLoop,
+        loop: true,
         grabCursor: true,
         spaceBetween: 16,
         speed: 750,
@@ -27,13 +24,13 @@ function initCharacterCarousel() {
 
         breakpoints: {
             768: {
-                slidesPerView: Math.min(slideCount, 7),
-                slidesPerGroup: canLoop ? 2 : 1,
+                slidesPerView: 7,
+                slidesPerGroup: 2,
                 spaceBetween: 16,
             },
             1024: {
-                slidesPerView: Math.min(slideCount, 9),
-                slidesPerGroup: canLoop ? 3 : 1,
+                slidesPerView: 9,
+                slidesPerGroup: 3,
                 spaceBetween: 16,
             },
         },
