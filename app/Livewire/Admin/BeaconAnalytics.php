@@ -51,6 +51,16 @@ class BeaconAnalytics extends Component
             $item->setRelation('beacon', $beaconsMap->get($item->beacon_id));
         });
 
+        // All beacons by scan count (for bar chart, last N days)
+        $scansPerBeacon = Beacon::leftJoin('beacon_scans', function ($join) use ($days) {
+                $join->on('beacons.id', '=', 'beacon_scans.beacon_id')
+                    ->where('beacon_scans.scanned_at', '>=', now()->subDays($days));
+            })
+            ->select('beacons.id', 'beacons.title', DB::raw('COUNT(beacon_scans.id) as scan_count'))
+            ->groupBy('beacons.id', 'beacons.title')
+            ->orderByDesc('scan_count')
+            ->get();
+
         // Top referrers (last 30 days)
         $topReferrers = BeaconScan::where('scanned_at', '>=', now()->subDays(30))
             ->whereNotNull('referrer')
@@ -78,6 +88,7 @@ class BeaconAnalytics extends Component
             'totalScans30' => $totalScans30,
             'totalScans90' => $totalScans90,
             'scansPerDay' => $filledDays,
+            'scansPerBeacon' => $scansPerBeacon,
             'topBeacons' => $topBeacons,
             'topReferrers' => $topReferrers,
             'devices' => $devices,

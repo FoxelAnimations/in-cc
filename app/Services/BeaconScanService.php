@@ -150,6 +150,8 @@ class BeaconScanService
             'utm_term' => $request->query('utm_term'),
             'utm_content' => $request->query('utm_content'),
             'rate_limited' => $rateLimited,
+            'recorded_latitude' => $beacon?->latitude,
+            'recorded_longitude' => $beacon?->longitude,
             'meta_json' => $this->buildMetaJson($request),
         ]);
     }

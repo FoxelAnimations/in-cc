@@ -65,7 +65,8 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // Default application timezone; set to Brussels to match local operations
+    'timezone' => 'Europe/Brussels',
 
     /*
     |--------------------------------------------------------------------------

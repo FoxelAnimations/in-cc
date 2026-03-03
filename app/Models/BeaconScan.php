@@ -24,6 +24,8 @@ class BeaconScan extends Model
         'utm_term',
         'utm_content',
         'rate_limited',
+        'recorded_latitude',
+        'recorded_longitude',
         'meta_json',
     ];
 
@@ -33,6 +35,8 @@ class BeaconScan extends Model
             'scanned_at' => 'datetime',
             'is_known' => 'boolean',
             'rate_limited' => 'boolean',
+            'recorded_latitude' => 'decimal:7',
+            'recorded_longitude' => 'decimal:7',
             'meta_json' => 'array',
         ];
     }
@@ -53,6 +57,22 @@ class BeaconScan extends Model
             return '—';
         }
         return Str::limit($this->user_agent, 60);
+    }
+
+    public function getRecordedLocationAttribute(): ?string
+    {
+        if ($this->recorded_latitude === null || $this->recorded_longitude === null) {
+            return null;
+        }
+        return $this->recorded_latitude . ', ' . $this->recorded_longitude;
+    }
+
+    public function getRecordedLocationMapUrlAttribute(): ?string
+    {
+        if ($this->recorded_latitude === null || $this->recorded_longitude === null) {
+            return null;
+        }
+        return "https://www.google.com/maps?q={$this->recorded_latitude},{$this->recorded_longitude}";
     }
 
     public function getDeviceTypeAttribute(): string

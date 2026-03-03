@@ -33,10 +33,21 @@
             </div>
         </div>
 
-        {{-- Scans Per Day Chart --}}
-        <div class="rounded-sm bg-zinc-900 border border-zinc-800 p-5 mb-8">
+        {{-- Tabbed Charts --}}
+        <div x-data="{ chartTab: 'daily' }" class="rounded-sm bg-zinc-900 border border-zinc-800 p-5 mb-8">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold uppercase tracking-wider text-zinc-400">Scans Per Day</h3>
+                <div class="flex items-center gap-1">
+                    <button @click="chartTab = 'daily'"
+                        :class="chartTab === 'daily' ? 'bg-accent text-black' : 'text-zinc-400 hover:text-white hover:border-zinc-500 border border-zinc-700'"
+                        class="px-3 py-1 text-sm font-semibold uppercase tracking-wider rounded-sm transition">
+                        Per Day
+                    </button>
+                    <button @click="chartTab = 'beacon'"
+                        :class="chartTab === 'beacon' ? 'bg-accent text-black' : 'text-zinc-400 hover:text-white hover:border-zinc-500 border border-zinc-700'"
+                        class="px-3 py-1 text-sm font-semibold uppercase tracking-wider rounded-sm transition">
+                        Per Beacon
+                    </button>
+                </div>
                 <select wire:model.live="period" class="bg-zinc-800 border border-zinc-700 text-white px-3 py-1 text-sm focus:border-accent focus:ring-accent rounded-sm">
                     <option value="7">7 days</option>
                     <option value="30">30 days</option>
@@ -44,24 +55,56 @@
                 </select>
             </div>
 
-            @php
-                $maxCount = max(1, max(array_values($scansPerDay)));
-            @endphp
+            {{-- Scans Per Day --}}
+            <div x-show="chartTab === 'daily'" x-cloak>
+                @php
+                    $maxCount = max(1, max(array_values($scansPerDay)));
+                @endphp
 
-            <div class="flex items-end gap-[2px] h-40">
-                @foreach ($scansPerDay as $date => $count)
-                    <div class="flex-1 group relative flex flex-col items-center justify-end h-full">
-                        <div class="w-full bg-accent/80 rounded-t-sm transition-all hover:bg-accent"
-                            style="height: {{ ($count / $maxCount) * 100 }}%"></div>
-                        <div class="absolute bottom-full mb-1 hidden group-hover:block bg-zinc-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                            {{ $date }}: {{ $count }} scans
+                <div class="flex items-end gap-[2px] h-40">
+                    @foreach ($scansPerDay as $date => $count)
+                        <div class="flex-1 group relative flex flex-col items-center justify-end h-full">
+                            <div class="w-full bg-accent/80 rounded-t-sm transition-all hover:bg-accent"
+                                style="height: {{ ($count / $maxCount) * 100 }}%"></div>
+                            <div class="absolute bottom-full mb-1 hidden group-hover:block bg-zinc-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                                {{ $date }}: {{ $count }} scans
+                            </div>
                         </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
+                <div class="flex justify-between mt-2 text-xs text-zinc-600">
+                    <span>{{ array_key_first($scansPerDay) }}</span>
+                    <span>{{ array_key_last($scansPerDay) }}</span>
+                </div>
             </div>
-            <div class="flex justify-between mt-2 text-xs text-zinc-600">
-                <span>{{ array_key_first($scansPerDay) }}</span>
-                <span>{{ array_key_last($scansPerDay) }}</span>
+
+            {{-- Scans Per Beacon --}}
+            <div x-show="chartTab === 'beacon'" x-cloak>
+                @if ($scansPerBeacon->isEmpty())
+                    <p class="text-zinc-600 text-sm py-8 text-center">No beacons yet.</p>
+                @else
+                    @php
+                        $maxBeaconScans = max(1, $scansPerBeacon->max('scan_count'));
+                    @endphp
+
+                    <div class="flex items-end gap-[3px] h-40">
+                        @foreach ($scansPerBeacon as $beacon)
+                            <div class="flex-1 group relative flex flex-col items-center justify-end h-full min-w-0">
+                                <div class="w-full rounded-t-sm transition-all {{ $beacon->scan_count > 0 ? 'bg-accent/80 hover:bg-accent' : 'bg-zinc-800' }}"
+                                    style="height: {{ $beacon->scan_count > 0 ? max(2, ($beacon->scan_count / $maxBeaconScans) * 100) : 2 }}%"></div>
+                                <div class="absolute bottom-full mb-1 hidden group-hover:block bg-zinc-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                                    {{ $beacon->title }}: {{ $beacon->scan_count }} scans
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-zinc-600">
+                        <span>{{ $scansPerBeacon->first()->title }}</span>
+                        @if ($scansPerBeacon->count() > 1)
+                            <span>{{ $scansPerBeacon->last()->title }}</span>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
 

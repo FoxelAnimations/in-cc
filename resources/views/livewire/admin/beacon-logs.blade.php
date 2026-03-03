@@ -69,6 +69,7 @@
                                 <th class="px-4 py-3 text-left">User Agent</th>
                                 <th class="px-4 py-3 text-left">Referrer</th>
                                 <th class="px-4 py-3 text-left">Redirect</th>
+                                <th class="px-4 py-3 text-left">Location</th>
                                 <th class="px-4 py-3 text-left">UTM</th>
                                 <th class="px-4 py-3 text-right">Actions</th>
                             </tr>
@@ -97,6 +98,17 @@
                                     <td class="px-4 py-3 text-zinc-400 max-w-[150px] truncate" title="{{ $scan->user_agent }}">{{ Str::limit($scan->user_agent, 30) }}</td>
                                     <td class="px-4 py-3 text-zinc-400 max-w-[120px] truncate" title="{{ $scan->referrer }}">{{ $scan->referrer ?: '—' }}</td>
                                     <td class="px-4 py-3 text-zinc-400 max-w-[120px] truncate" title="{{ $scan->redirect_url_used }}">{{ $scan->redirect_url_used }}</td>
+                                    <td class="px-4 py-3 text-zinc-400 whitespace-nowrap">
+                                        @if ($scan->recorded_location)
+                                            @if ($scan->recorded_location_map_url)
+                                                <a href="{{ $scan->recorded_location_map_url }}" target="_blank" class="hover:text-accent transition" title="Open in Maps">{{ $scan->recorded_location }}</a>
+                                            @else
+                                                {{ $scan->recorded_location }}
+                                            @endif
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-zinc-500 text-xs max-w-[120px] truncate">
                                         @if ($scan->utm_source)
                                             {{ $scan->utm_source }}

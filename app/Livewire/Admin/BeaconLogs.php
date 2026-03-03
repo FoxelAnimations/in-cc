@@ -51,6 +51,7 @@ class BeaconLogs extends Component
             fputcsv($handle, [
                 'ID', 'Scanned At', 'GUID', 'Beacon Title', 'Known', 'Hashed IP',
                 'User Agent', 'Referrer', 'Requested URL', 'Redirect Used',
+                'Recorded Latitude', 'Recorded Longitude',
                 'UTM Source', 'UTM Medium', 'UTM Campaign', 'UTM Term', 'UTM Content',
                 'Rate Limited', 'Device Type',
             ]);
@@ -66,6 +67,8 @@ class BeaconLogs extends Component
                     $scan->referrer,
                     $scan->requested_url,
                     $scan->redirect_url_used,
+                    $scan->recorded_latitude,
+                    $scan->recorded_longitude,
                     $scan->utm_source,
                     $scan->utm_medium,
                     $scan->utm_campaign,
