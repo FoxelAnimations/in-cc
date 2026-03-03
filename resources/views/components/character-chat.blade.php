@@ -219,9 +219,9 @@
                 this.startPolling();
             } finally {
                 this.sending = false;
-                // Cooldown: prevent sending again for 3 seconds
+                // Cooldown: prevent sending again for 1 second
                 this.cooldown = true;
-                setTimeout(() => { this.cooldown = false; }, 3000);
+                setTimeout(() => { this.cooldown = false; }, 1000);
                 this.$nextTick(() => this.scrollToBottom());
             }
         },

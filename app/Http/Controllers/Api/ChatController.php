@@ -84,14 +84,14 @@ class ChatController extends Controller
             return response()->json(['error' => 'Je bent geblokkeerd voor de chat.'], 403);
         }
 
-        // Cooldown: 3 seconds between messages per visitor
+        // Cooldown: 1 second between messages per visitor
         $cooldownKey = 'chat_cooldown:' . $validated['visitor_uuid'];
         if (Cache::has($cooldownKey)) {
             return response()->json([
                 'error' => 'Wacht even voordat je een nieuw bericht stuurt.',
             ], 429);
         }
-        Cache::put($cooldownKey, true, 3);
+        Cache::put($cooldownKey, true, 1);
 
         // Duplicate message prevention (same visitor + same text within 30s)
         $dupeKey = 'chat_dupe:' . $validated['visitor_uuid'] . ':' . md5($validated['message']);
@@ -304,9 +304,13 @@ class ChatController extends Controller
         } catch (\Exception $e) {
             report($e);
 
+            // Visitor message was already saved — return success so the UI doesn't show an error.
+            // The AI response simply won't appear, which is fine.
             return response()->json([
-                'error' => 'Er ging iets mis. Probeer het opnieuw.',
-            ], 500);
+                'conversation_id' => $conversation->id,
+                'mode' => 'manual',
+                'message' => null,
+            ]);
         }
     }
 }
