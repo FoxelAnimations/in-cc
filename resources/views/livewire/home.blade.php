@@ -44,6 +44,7 @@
                                     data-character-json="{{ json_encode([
                                         'name' => $character->full_name,
                                         'nickname' => $character->nick_name,
+                                        'age' => $character->age,
                                         'job' => $character->job?->title,
                                         'bio' => $character->bio,
                                         'image' => $character->profile_image_path ? Storage::url($character->profile_image_path) : null,
@@ -93,6 +94,7 @@
                                     data-character-json="{{ json_encode([
                                         'name' => $character->full_name,
                                         'nickname' => $character->nick_name,
+                                        'age' => $character->age,
                                         'job' => $character->job?->title,
                                         'bio' => $character->bio,
                                         'image' => $character->profile_image_path ? Storage::url($character->profile_image_path) : null,
@@ -181,9 +183,14 @@
                                 <template x-if="char?.nickname">
                                     <p class="text-accent text-sm uppercase tracking-wider mb-2">"<span x-text="char?.nickname"></span>"</p>
                                 </template>
-                                <template x-if="char?.job">
-                                    <p class="text-zinc-500 text-lg uppercase tracking-wider mb-6" x-text="char?.job"></p>
-                                </template>
+                                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mb-6">
+                                    <template x-if="char?.job">
+                                        <span class="text-zinc-500 text-lg uppercase tracking-wider" x-text="char?.job"></span>
+                                    </template>
+                                    <template x-if="char?.age">
+                                        <span class="text-zinc-500 text-lg uppercase tracking-wider">Age: <span class="text-accent" x-text="char?.age"></span></span>
+                                    </template>
+                                </div>
                                 <template x-if="char?.bio">
                                     <p class="text-zinc-400 text-sm leading-relaxed" x-text="char?.bio"></p>
                                 </template>
