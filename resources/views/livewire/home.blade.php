@@ -21,89 +21,108 @@
                 </h1>
             @endif
 
-            <div wire:ignore>
+            @php
+                $slides = $characters;
+                while ($slides->count() < 20) {
+                    $slides = $slides->concat($characters);
+                }
+            @endphp
+
+            {{-- MOBILE Carousel (< md) --}}
+            <div class="md:hidden" wire:ignore>
                 <div class="relative">
-                    {{-- Gradient edges --}}
                     <div class="absolute inset-y-0 left-0 w-1/3 z-10 pointer-events-none bg-gradient-to-r from-black/40 via-black/20 to-transparent"></div>
                     <div class="absolute inset-y-0 right-0 w-1/3 z-10 pointer-events-none bg-gradient-to-l from-black/40 via-black/20 to-transparent"></div>
 
-                <div class="character-carousel carousel-entering swiper">
-                    @php
-                        $slides = $characters;
-                        while ($slides->count() < 20) {
-                            $slides = $slides->concat($characters);
-                        }
-                    @endphp
-                    <div class="swiper-wrapper">
-                        @foreach ($slides as $character)
-                            <div
-                                class="swiper-slide group"
-                                data-name="{{ $character->first_name }}"
-                                data-job="{{ $character->job?->title }}"
-                                data-character-json="{{ Js::from([
-                                    'name' => $character->full_name,
-                                    'nickname' => $character->nick_name,
-                                    'job' => $character->job?->title,
-                                    'bio' => $character->bio,
-                                    'image' => $character->profile_image_path ? Storage::url($character->profile_image_path) : null,
-                                    'imageHover' => $character->profile_image_hover_path ? Storage::url($character->profile_image_hover_path) : null,
-                                    'fullBody' => Storage::url($character->full_body_image_path),
-                                    'fullBodyHover' => $character->full_body_image_hover_path ? Storage::url($character->full_body_image_hover_path) : null,
-                                    'background' => $character->background_image_path ? Storage::url($character->background_image_path) : null,
-                                    'links' => $character->socialLinks->map(fn($l) => ['title' => $l->title, 'url' => $l->url]),
-                                ]) }}"
-                            >
-                                {{-- Static image --}}
-                                <img
-                                    src="{{ Storage::url($character->full_body_image_path) }}"
-                                    alt="{{ $character->first_name }}"
-                                    class="h-full w-auto character-static-img"
-                                    loading="eager"
-                                    draggable="false"
-                                />
-                                {{-- Hover image --}}
-                                @if ($character->full_body_image_hover_path)
-                                    <img
-                                        src="{{ Storage::url($character->full_body_image_hover_path) }}"
-                                        alt="{{ $character->first_name }}"
-                                        class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 character-hover-img"
-                                        loading="eager"
-                                        draggable="false"
-                                    />
-                                @endif
-                                {{-- Animated layer (gif/webm) --}}
-                                @if ($character->full_body_image_animated_path)
-                                    @if (str_ends_with($character->full_body_image_animated_path, '.webm'))
-                                        <video
-                                            src="{{ Storage::url($character->full_body_image_animated_path) }}"
-                                            class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 character-animated-layer"
-                                            style="opacity: 0.01;"
-                                            muted
-                                            playsinline
-                                            preload="auto"
-                                            draggable="false"
-                                        ></video>
-                                    @else
-                                        <img
-                                            src="{{ Storage::url($character->full_body_image_animated_path) }}"
-                                            alt="{{ $character->first_name }} animated"
-                                            class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 character-animated-layer"
-                                            style="opacity: 0.01;"
-                                            loading="eager"
-                                            draggable="false"
-                                        />
+                    <div class="character-carousel character-carousel-mobile carousel-entering swiper">
+                        <div class="swiper-wrapper">
+                            @foreach ($slides as $character)
+                                <div
+                                    class="swiper-slide group"
+                                    data-name="{{ $character->first_name }}"
+                                    data-job="{{ $character->job?->title }}"
+                                    data-character-json="{{ Js::from([
+                                        'name' => $character->full_name,
+                                        'nickname' => $character->nick_name,
+                                        'job' => $character->job?->title,
+                                        'bio' => $character->bio,
+                                        'image' => $character->profile_image_path ? Storage::url($character->profile_image_path) : null,
+                                        'imageHover' => $character->profile_image_hover_path ? Storage::url($character->profile_image_hover_path) : null,
+                                        'fullBody' => Storage::url($character->full_body_image_path),
+                                        'fullBodyHover' => $character->full_body_image_hover_path ? Storage::url($character->full_body_image_hover_path) : null,
+                                        'background' => $character->background_image_path ? Storage::url($character->background_image_path) : null,
+                                        'links' => $character->socialLinks->map(fn($l) => ['title' => $l->title, 'url' => $l->url]),
+                                    ]) }}"
+                                >
+                                    <img src="{{ Storage::url($character->full_body_image_path) }}" alt="{{ $character->first_name }}" class="h-full w-auto character-static-img" loading="eager" draggable="false" />
+                                    @if ($character->full_body_image_hover_path)
+                                        <img src="{{ Storage::url($character->full_body_image_hover_path) }}" alt="{{ $character->first_name }}" class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 character-hover-img" loading="eager" draggable="false" />
                                     @endif
-                                @endif
-                            </div>
-                        @endforeach
+                                    @if ($character->full_body_image_animated_path)
+                                        @if (str_ends_with($character->full_body_image_animated_path, '.webm'))
+                                            <video src="{{ Storage::url($character->full_body_image_animated_path) }}" class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 character-animated-layer" style="opacity: 0.01;" muted playsinline preload="auto" draggable="false"></video>
+                                        @else
+                                            <img src="{{ Storage::url($character->full_body_image_animated_path) }}" alt="{{ $character->first_name }} animated" class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 character-animated-layer" style="opacity: 0.01;" loading="eager" draggable="false" />
+                                        @endif
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
+
+                <div class="text-center py-3">
+                    <div class="carousel-center-name text-xl font-bold uppercase tracking-wider text-white"></div>
+                    <div class="carousel-center-job text-sm uppercase tracking-wider text-accent"></div>
+                </div>
+            </div>
+
+            {{-- DESKTOP Carousel (>= md) --}}
+            <div class="hidden md:block" wire:ignore>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 w-1/3 z-10 pointer-events-none bg-gradient-to-r from-black/40 via-black/20 to-transparent"></div>
+                    <div class="absolute inset-y-0 right-0 w-1/3 z-10 pointer-events-none bg-gradient-to-l from-black/40 via-black/20 to-transparent"></div>
+
+                    <div class="character-carousel character-carousel-desktop carousel-entering swiper">
+                        <div class="swiper-wrapper">
+                            @foreach ($slides as $character)
+                                <div
+                                    class="swiper-slide group"
+                                    data-name="{{ $character->first_name }}"
+                                    data-job="{{ $character->job?->title }}"
+                                    data-character-json="{{ Js::from([
+                                        'name' => $character->full_name,
+                                        'nickname' => $character->nick_name,
+                                        'job' => $character->job?->title,
+                                        'bio' => $character->bio,
+                                        'image' => $character->profile_image_path ? Storage::url($character->profile_image_path) : null,
+                                        'imageHover' => $character->profile_image_hover_path ? Storage::url($character->profile_image_hover_path) : null,
+                                        'fullBody' => Storage::url($character->full_body_image_path),
+                                        'fullBodyHover' => $character->full_body_image_hover_path ? Storage::url($character->full_body_image_hover_path) : null,
+                                        'background' => $character->background_image_path ? Storage::url($character->background_image_path) : null,
+                                        'links' => $character->socialLinks->map(fn($l) => ['title' => $l->title, 'url' => $l->url]),
+                                    ]) }}"
+                                >
+                                    <img src="{{ Storage::url($character->full_body_image_path) }}" alt="{{ $character->first_name }}" class="h-full w-auto character-static-img" loading="eager" draggable="false" />
+                                    @if ($character->full_body_image_hover_path)
+                                        <img src="{{ Storage::url($character->full_body_image_hover_path) }}" alt="{{ $character->first_name }}" class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 character-hover-img" loading="eager" draggable="false" />
+                                    @endif
+                                    @if ($character->full_body_image_animated_path)
+                                        @if (str_ends_with($character->full_body_image_animated_path, '.webm'))
+                                            <video src="{{ Storage::url($character->full_body_image_animated_path) }}" class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 character-animated-layer" style="opacity: 0.01;" muted playsinline preload="auto" draggable="false"></video>
+                                        @else
+                                            <img src="{{ Storage::url($character->full_body_image_animated_path) }}" alt="{{ $character->first_name }} animated" class="h-full w-auto absolute bottom-0 left-1/2 -translate-x-1/2 character-animated-layer" style="opacity: 0.01;" loading="eager" draggable="false" />
+                                        @endif
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
 
-                {{-- Center character name + job --}}
                 <div class="text-center py-3">
-                    <div class="carousel-center-name text-xl md:text-2xl font-bold uppercase tracking-wider text-white"></div>
-                    <div class="carousel-center-job text-sm md:text-base uppercase tracking-wider text-accent"></div>
+                    <div class="carousel-center-name text-2xl font-bold uppercase tracking-wider text-white"></div>
+                    <div class="carousel-center-job text-base uppercase tracking-wider text-accent"></div>
                 </div>
             </div>
 
