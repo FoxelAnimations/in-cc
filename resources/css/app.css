@@ -61,7 +61,7 @@
 
 .character-carousel .swiper-slide img,
 .character-carousel .swiper-slide video {
-    object-fit: contain;
+    object-fit: cover;
     object-position: bottom center;
     user-select: none;
     -webkit-user-drag: none;
