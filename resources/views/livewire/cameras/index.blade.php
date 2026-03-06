@@ -99,10 +99,10 @@
                                 <canvas class="absolute inset-0 w-full h-full rain-canvas" data-type="card"></canvas>
                             </div>
 
-                            {{-- Video (first frame only, absolute so it composites over sky bg) --}}
+                            {{-- Video --}}
                             <video
                                 x-ref="cam{{ $camera->id }}"
-                                muted playsinline preload="auto"
+                                muted autoplay playsinline preload="auto"
                                 class="absolute inset-0 w-full h-full object-cover z-[2]"
                                 x-show="getCameraStatus({{ $camera->id }}) === 'online' && getCameraVideoUrl({{ $camera->id }})"
                                 style="display: none;"
@@ -557,13 +557,16 @@ Alpine.data('cameraFeed', () => ({
                         const videoEl = this.$refs['cam' + cam.id];
                         if (videoEl) {
                             if (cam.status === 'online' && cam.video_url) {
+                                const offset = cam.video_start_offset_seconds ?? 0;
                                 videoEl.loop = (cam.behaviour_type !== 'realtime');
                                 videoEl.src = cam.video_url;
+                                if (offset > 0) {
+                                    videoEl.addEventListener('loadedmetadata', () => {
+                                        videoEl.currentTime = Math.min(offset, videoEl.duration - 0.1);
+                                        videoEl.play().catch(() => {});
+                                    }, { once: true });
+                                }
                                 videoEl.load();
-                                videoEl.addEventListener('loadeddata', () => {
-                                    const offset = cam.video_start_offset_seconds ?? 0;
-                                    videoEl.currentTime = offset > 0 ? offset : 0.001;
-                                }, { once: true });
                             } else {
                                 videoEl.removeAttribute('src');
                                 videoEl.load();
@@ -843,15 +846,17 @@ Alpine.data('cameraFeed', () => ({
                 videoEl.loop = !isRealtime;
                 videoEl.muted = true;
                 videoEl.src = videoUrl;
-                videoEl.load();
                 if (isRealtime && offsetSeconds > 0) {
                     videoEl.addEventListener('loadedmetadata', () => {
                         videoEl.currentTime = Math.min(offsetSeconds, Math.max(0, videoEl.duration - 0.5));
                         videoEl.play().catch(() => {});
                     }, { once: true });
                 } else {
-                    videoEl.play().catch(() => {});
+                    videoEl.addEventListener('canplay', () => {
+                        videoEl.play().catch(() => {});
+                    }, { once: true });
                 }
+                videoEl.load();
             } else {
                 videoEl.pause();
                 videoEl.removeAttribute('src');
@@ -872,7 +877,9 @@ Alpine.data('cameraFeed', () => ({
                         }
                     }, { once: true });
                 } else if (!this.popup.muted) {
-                    audioEl.play().catch(() => {});
+                    audioEl.addEventListener('canplay', () => {
+                        audioEl.play().catch(() => {});
+                    }, { once: true });
                 }
             } else {
                 audioEl.pause();
