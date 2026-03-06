@@ -277,7 +277,7 @@
                             <p class="text-zinc-500 text-lg uppercase tracking-wider mb-6" x-text="char?.job"></p>
                         </template>
                         <template x-if="char?.bio">
-                            <p class="text-zinc-400 text-sm leading-relaxed" x-text="char?.bio"></p>
+                            <p class="text-zinc-400 text-sm leading-relaxed font-description" x-text="char?.bio"></p>
                         </template>
                     </div>
                 </div>

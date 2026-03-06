@@ -107,8 +107,8 @@ class CameraPlanner extends Component
     public function uploadVideo(): void
     {
         $this->validate([
-            'videoUpload' => ['required', 'mimes:mp4,webm,mov', 'max:102400'],
-            'newAudioUpload' => ['nullable', 'mimes:mp3,wav,ogg,aac,m4a', 'max:51200'],
+            'videoUpload' => ['required', 'mimes:mp4,webm,mov'],
+            'newAudioUpload' => ['nullable', 'mimes:mp3,wav,ogg,aac,m4a'],
         ]);
 
         $filename = $this->videoUpload->getClientOriginalName();
@@ -177,7 +177,7 @@ class CameraPlanner extends Component
     public function uploadAudio(int $videoId): void
     {
         $this->validate([
-            "audioUploads.{$videoId}" => ['required', 'mimes:mp3,wav,ogg,aac,m4a', 'max:51200'],
+            "audioUploads.{$videoId}" => ['required', 'mimes:mp3,wav,ogg,aac,m4a'],
         ]);
 
         $video = CameraVideo::where('camera_id', $this->camera->id)->findOrFail($videoId);
@@ -210,7 +210,7 @@ class CameraPlanner extends Component
     public function uploadBackground(): void
     {
         $this->validate([
-            'backgroundUpload' => ['required', 'mimes:jpg,jpeg,png,gif,webm', 'max:51200'],
+            'backgroundUpload' => ['required', 'mimes:jpg,jpeg,png,gif,webm'],
         ]);
 
         if ($this->camera->background_path) {
