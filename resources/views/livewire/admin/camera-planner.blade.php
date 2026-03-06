@@ -433,7 +433,13 @@
                     </button>
                 </div>
                 <div class="p-5">
-                    <form wire:submit="uploadVideo">
+                    <form wire:submit="uploadVideo"
+                        x-data="{ progress: 0 }"
+                        x-on:livewire-upload-start="progress = 0"
+                        x-on:livewire-upload-progress="progress = $event.detail.progress"
+                        x-on:livewire-upload-error="progress = 0"
+                        x-on:livewire-upload-finish="progress = 0"
+                    >
 
                         {{-- Video file --}}
                         <div class="mb-4">
@@ -445,6 +451,18 @@
                                 class="block w-full text-sm text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-zinc-800 file:text-white hover:file:bg-zinc-700">
                             <div wire:loading wire:target="videoUpload" class="text-xs text-zinc-500 mt-1">Bestand laden...</div>
                             @error('videoUpload') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Upload progress --}}
+                        <div class="mb-4" x-show="progress > 0" x-cloak>
+                            <div class="h-2 rounded-sm bg-zinc-800 overflow-hidden border border-zinc-700">
+                                <div class="h-full bg-gradient-to-r from-accent via-orange-400 to-yellow-300 transition-all duration-150"
+                                    :style="`width: ${progress}%`"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-zinc-400 mt-1">
+                                <span>Upload bezig...</span>
+                                <span x-text="progress + '%'"></span>
+                            </div>
                         </div>
 
                         {{-- Type --}}

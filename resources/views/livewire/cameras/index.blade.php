@@ -102,7 +102,7 @@
                             {{-- Video --}}
                             <video
                                 x-ref="cam{{ $camera->id }}"
-                                muted autoplay playsinline preload="auto"
+                                muted playsinline preload="metadata"
                                 class="absolute inset-0 w-full h-full object-cover z-[2]"
                                 x-show="getCameraStatus({{ $camera->id }}) === 'online' && getCameraVideoUrl({{ $camera->id }})"
                                 style="display: none;"
@@ -558,16 +558,21 @@ Alpine.data('cameraFeed', () => ({
                         if (videoEl) {
                             if (cam.status === 'online' && cam.video_url) {
                                 const offset = cam.video_start_offset_seconds ?? 0;
-                                videoEl.loop = (cam.behaviour_type !== 'realtime');
+                                const isRealtime = cam.behaviour_type === 'realtime';
+                                videoEl.loop = false; // always show single frame
                                 videoEl.src = cam.video_url;
-                                if (offset > 0) {
-                                    videoEl.addEventListener('loadedmetadata', () => {
-                                        videoEl.currentTime = Math.min(offset, videoEl.duration - 0.1);
-                                        videoEl.play().catch(() => {});
-                                    }, { once: true });
-                                }
+                                videoEl.addEventListener('loadedmetadata', () => {
+                                    if (offset > 0) {
+                                        videoEl.currentTime = Math.min(offset, Math.max(0, videoEl.duration - 0.1));
+                                    } else if (isRealtime) {
+                                        // show current frame for realtime even if offset is 0
+                                        videoEl.currentTime = 0;
+                                    }
+                                    videoEl.pause();
+                                }, { once: true });
                                 videoEl.load();
                             } else {
+                                videoEl.pause();
                                 videoEl.removeAttribute('src');
                                 videoEl.load();
                             }
