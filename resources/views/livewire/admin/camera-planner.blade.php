@@ -2,7 +2,7 @@
     <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Header --}}
-        <div class="sticky top-0 z-30 flex items-center justify-between mb-6 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 px-4 sm:px-6 lg:px-8 -mx-4 sm:-mx-6 lg:-mx-8 py-4">
+        <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-4">
                 <a href="{{ route('admin.cameras') }}" class="text-zinc-400 hover:text-white transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -291,8 +291,8 @@
             <div class="flex-1 overflow-x-auto" wire:ignore
                 x-data="cameraPlanner({{ Js::from($scheduleData) }}, {{ $snapMinutes }}, {{ Js::from($videosMeta) }})"
             >
-                {{-- Day Headers --}}
-                <div class="flex border-b border-zinc-800 sticky top-0 z-20 bg-black">
+                {{-- Day Headers (sticky) --}}
+                <div class="flex border-b border-zinc-800 sticky top-0 z-30 bg-zinc-950/95 backdrop-blur">
                     <div class="w-14 shrink-0"></div>
                     @foreach (\App\Models\CameraDefaultBlock::DAY_LABELS as $i => $label)
                         <div class="flex-1 text-center py-2 text-xs font-semibold uppercase tracking-wider {{ $i < 6 ? 'border-r border-zinc-800' : '' }} text-zinc-400">
