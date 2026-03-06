@@ -13,6 +13,8 @@ class CameraVideo extends Model
         'filename',
         'video_path',
         'audio_path',
+        'behaviour_type',
+        'duration_seconds',
         'sort_order',
     ];
 

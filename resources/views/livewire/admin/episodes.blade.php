@@ -75,7 +75,7 @@
                                             @endif
                                         </div>
                                         @if ($episode->description)
-                                            <div class="text-xs text-zinc-500 max-w-xs truncate">{{ \Illuminate\Support\Str::limit($episode->description, 60) }}</div>
+                                            <div class="text-xs text-zinc-500 max-w-xs truncate font-description">{{ \Illuminate\Support\Str::limit($episode->description, 60) }}</div>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">

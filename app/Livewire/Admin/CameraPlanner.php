@@ -16,8 +16,13 @@ class CameraPlanner extends Component
 
     public Camera $camera;
 
-    // Video upload
+    // Video upload (used by Add Video modal)
     public $videoUpload = null;
+    public $newAudioUpload = null;
+    public string $newVideoType = 'loop';
+    public ?int $newVideoDurationSeconds = null;
+
+    // Audio uploads map (videoId => file) — for editing existing videos
     public array $audioUploads = [];
     public $backgroundUpload = null;
 
@@ -26,6 +31,15 @@ class CameraPlanner extends Component
 
     // Snap precision
     public int $snapMinutes = 15;
+
+    // Add Video Modal
+    public bool $showAddVideoModal = false;
+
+    // Edit Video Modal
+    public bool $showEditVideoModal = false;
+    public ?int $editingVideoId = null;
+    public string $editVideoName = '';
+    public string $editVideoType = 'loop';
 
     // Schedule modal
     public bool $showScheduleModal = false;
@@ -74,27 +88,91 @@ class CameraPlanner extends Component
         $this->dispatch('snap-updated', snap: $this->snapMinutes);
     }
 
-    // ─── Video Library ───────────────────────────────────────
+    // ─── Add Video Modal ─────────────────────────────────────
+
+    public function openAddVideoModal(): void
+    {
+        $this->reset('videoUpload', 'newAudioUpload', 'newVideoDurationSeconds');
+        $this->newVideoType = 'loop';
+        $this->showAddVideoModal = true;
+    }
+
+    public function closeAddVideoModal(): void
+    {
+        $this->reset('videoUpload', 'newAudioUpload', 'newVideoDurationSeconds');
+        $this->newVideoType = 'loop';
+        $this->showAddVideoModal = false;
+    }
 
     public function uploadVideo(): void
     {
         $this->validate([
             'videoUpload' => ['required', 'mimes:mp4,webm,mov', 'max:102400'],
+            'newAudioUpload' => ['nullable', 'mimes:mp3,wav,ogg,aac,m4a', 'max:51200'],
         ]);
 
         $filename = $this->videoUpload->getClientOriginalName();
-        $path = $this->videoUpload->store("cameras/{$this->camera->id}/videos", 'public');
+        $videoPath = $this->videoUpload->store("cameras/{$this->camera->id}/videos", 'public');
+
+        $audioPath = null;
+        if ($this->newAudioUpload) {
+            $audioPath = $this->newAudioUpload->store("cameras/{$this->camera->id}/audio", 'public');
+        }
 
         CameraVideo::create([
             'camera_id' => $this->camera->id,
             'filename' => $filename,
-            'video_path' => $path,
+            'video_path' => $videoPath,
+            'audio_path' => $audioPath,
+            'behaviour_type' => $this->newVideoType,
+            'duration_seconds' => $this->newVideoType === 'realtime' ? $this->newVideoDurationSeconds : null,
             'sort_order' => (CameraVideo::where('camera_id', $this->camera->id)->max('sort_order') ?? -1) + 1,
         ]);
 
-        $this->reset('videoUpload');
+        $this->closeAddVideoModal();
         session()->flash('status', 'Video geüpload.');
     }
+
+    // ─── Edit Video Modal ─────────────────────────────────────
+
+    public function openEditVideoModal(int $id): void
+    {
+        $video = CameraVideo::where('camera_id', $this->camera->id)->findOrFail($id);
+        $this->editingVideoId = $id;
+        $this->editVideoName = $video->filename;
+        $this->editVideoType = $video->behaviour_type ?? 'loop';
+        $this->showEditVideoModal = true;
+    }
+
+    public function saveEditVideo(): void
+    {
+        $this->validate([
+            'editVideoName' => ['required', 'string', 'max:255'],
+            'editVideoType' => ['required', 'in:loop,realtime'],
+        ]);
+
+        $video = CameraVideo::where('camera_id', $this->camera->id)->findOrFail($this->editingVideoId);
+        $video->update([
+            'filename' => trim($this->editVideoName),
+            'behaviour_type' => $this->editVideoType,
+            // When switching to loop, clear duration; keep existing duration when realtime
+            'duration_seconds' => $this->editVideoType === 'loop' ? null : $video->duration_seconds,
+        ]);
+
+        $this->closeEditVideoModal();
+        $this->dispatchScheduleUpdate();
+        session()->flash('status', 'Video bijgewerkt.');
+    }
+
+    public function closeEditVideoModal(): void
+    {
+        $this->editingVideoId = null;
+        $this->editVideoName = '';
+        $this->editVideoType = 'loop';
+        $this->showEditVideoModal = false;
+    }
+
+    // ─── Audio ───────────────────────────────────────────────
 
     public function uploadAudio(int $videoId): void
     {
@@ -104,7 +182,6 @@ class CameraPlanner extends Component
 
         $video = CameraVideo::where('camera_id', $this->camera->id)->findOrFail($videoId);
 
-        // Delete old audio if exists
         if ($video->audio_path) {
             Storage::disk('public')->delete($video->audio_path);
         }
@@ -136,7 +213,6 @@ class CameraPlanner extends Component
             'backgroundUpload' => ['required', 'mimes:jpg,jpeg,png,gif,webm', 'max:51200'],
         ]);
 
-        // Delete old background if exists
         if ($this->camera->background_path) {
             Storage::disk('public')->delete($this->camera->background_path);
         }
@@ -187,6 +263,7 @@ class CameraPlanner extends Component
         }
 
         $video->delete();
+        $this->closeEditVideoModal();
         session()->flash('status', 'Video verwijderd.');
     }
 
@@ -239,6 +316,14 @@ class CameraPlanner extends Component
 
     public function saveSchedule(): void
     {
+        // For realtime videos, auto-calculate end time from duration
+        $video = CameraVideo::find($this->scheduleVideoId);
+        if ($video && $video->behaviour_type === 'realtime' && $video->duration_seconds) {
+            $startMinutes = $this->timeStringToMinutes($this->scheduleStartTime);
+            $endMinutes = min(1440, $startMinutes + (int) ceil($video->duration_seconds / 60));
+            $this->scheduleEndTime = sprintf('%02d:%02d', intdiv($endMinutes, 60), $endMinutes % 60);
+        }
+
         $this->validate([
             'scheduleVideoId' => ['required', 'exists:camera_videos,id'],
             'scheduleDayOfWeek' => ['required', 'integer', 'between:0,6'],
@@ -275,12 +360,21 @@ class CameraPlanner extends Component
 
     public function updateScheduledPosition(int $id, int $dayOfWeek, string $startTime, string $endTime): void
     {
+        $scheduled = CameraScheduledVideo::where('camera_id', $this->camera->id)->findOrFail($id);
+
+        // For realtime videos, lock the duration (recalculate end from start + duration)
+        if ($scheduled->video?->behaviour_type === 'realtime' && $scheduled->video?->duration_seconds) {
+            $startMinutes = $this->timeStringToMinutes($startTime);
+            $durationMinutes = (int) ceil($scheduled->video->duration_seconds / 60);
+            $endMinutes = min(1440, $startMinutes + $durationMinutes);
+            $endTime = sprintf('%02d:%02d', intdiv($endMinutes, 60), $endMinutes % 60);
+        }
+
         if ($this->hasOverlap($dayOfWeek, $startTime, $endTime, $id)) {
             $this->dispatchScheduleUpdate(); // Reset client to DB state
             return;
         }
 
-        $scheduled = CameraScheduledVideo::where('camera_id', $this->camera->id)->findOrFail($id);
         $scheduled->update([
             'day_of_week' => $dayOfWeek,
             'start_time' => $startTime,
@@ -300,6 +394,15 @@ class CameraPlanner extends Component
 
     public function createFromDrop(int $videoId, int $dayOfWeek, string $startTime, string $endTime): void
     {
+        $video = CameraVideo::where('camera_id', $this->camera->id)->findOrFail($videoId);
+
+        // For realtime videos, enforce duration-based end time
+        if ($video->behaviour_type === 'realtime' && $video->duration_seconds) {
+            $startMinutes = $this->timeStringToMinutes($startTime);
+            $endMinutes = min(1440, $startMinutes + (int) ceil($video->duration_seconds / 60));
+            $endTime = sprintf('%02d:%02d', intdiv($endMinutes, 60), $endMinutes % 60);
+        }
+
         if ($this->hasOverlap($dayOfWeek, $startTime, $endTime)) {
             $this->dispatchScheduleUpdate(); // Reset client to DB state
             return;
@@ -341,6 +444,8 @@ class CameraPlanner extends Component
                 'id' => $item->id,
                 'video_id' => $item->camera_video_id,
                 'video_name' => $item->video?->filename,
+                'behaviour_type' => $item->video?->behaviour_type ?? 'loop',
+                'duration_seconds' => $item->video?->duration_seconds,
                 'day_of_week' => $item->day_of_week,
                 'start_time' => substr($item->start_time, 0, 5),
                 'end_time' => substr($item->end_time, 0, 5),
@@ -357,6 +462,12 @@ class CameraPlanner extends Component
         $this->scheduleEndTime = '09:00';
     }
 
+    protected function timeStringToMinutes(string $time): int
+    {
+        $parts = explode(':', $time);
+        return intval($parts[0]) * 60 + intval($parts[1] ?? 0);
+    }
+
     // ─── Render ──────────────────────────────────────────────
 
     public function render()
@@ -364,6 +475,14 @@ class CameraPlanner extends Component
         $videos = $this->camera->videos()->orderBy('sort_order')->get();
         $defaults = $this->camera->defaultBlocks()->with('video')->get();
         $scheduled = $this->camera->scheduledVideos()->with('video')->get();
+
+        $videosMeta = $videos->mapWithKeys(fn ($v) => [
+            $v->id => [
+                'id' => $v->id,
+                'behaviour_type' => $v->behaviour_type ?? 'loop',
+                'duration_seconds' => $v->duration_seconds,
+            ]
+        ])->toArray();
 
         // Build schedule data for Alpine.js
         $scheduleData = [
@@ -382,6 +501,8 @@ class CameraPlanner extends Component
                     'id' => $item->id,
                     'video_id' => $item->camera_video_id,
                     'video_name' => $item->video?->filename,
+                    'behaviour_type' => $item->video?->behaviour_type ?? 'loop',
+                    'duration_seconds' => $item->video?->duration_seconds,
                     'day_of_week' => $item->day_of_week,
                     'start_time' => substr($item->start_time, 0, 5),
                     'end_time' => substr($item->end_time, 0, 5),
@@ -396,6 +517,7 @@ class CameraPlanner extends Component
             'defaults' => $defaults,
             'scheduled' => $scheduled,
             'scheduleData' => $scheduleData,
+            'videosMeta' => $videosMeta,
         ])->layout('layouts.admin');
     }
 }

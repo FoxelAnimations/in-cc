@@ -46,11 +46,15 @@ class CameraController extends Controller
 
             $videoUrl = null;
             $audioUrl = null;
+            $blockStartTime = null;
             $blockEndTime = null;
+            $activeVideo = null;
 
             if ($activeScheduled) {
-                $videoUrl = $activeScheduled->video?->videoUrl();
-                $audioUrl = $activeScheduled->video?->audioUrl();
+                $activeVideo = $activeScheduled->video;
+                $videoUrl = $activeVideo?->videoUrl();
+                $audioUrl = $activeVideo?->audioUrl();
+                $blockStartTime = substr($activeScheduled->start_time, 0, 5);
                 $blockEndTime = substr($activeScheduled->end_time, 0, 5);
             } else {
                 // Fall back to default block
@@ -60,14 +64,26 @@ class CameraController extends Controller
                     ->where('time_slot', $slot)
                     ->first();
 
-                $videoUrl = $defaultBlock?->video?->videoUrl();
-                $audioUrl = $defaultBlock?->video?->audioUrl();
+                $activeVideo = $defaultBlock?->video;
+                $videoUrl = $activeVideo?->videoUrl();
+                $audioUrl = $activeVideo?->audioUrl();
+                $blockStartTime = CameraDefaultBlock::slots()[$slot]['start'];
                 $blockEndTime = CameraDefaultBlock::slots()[$slot]['end'];
             }
 
             // Calculate seconds until current block ends (seconds-precise)
             $blockEndMinutes = $blockEndTime === '24:00' ? 1440 : $this->timeToMinutes($blockEndTime);
             $currentTotalSeconds = intval($now->format('H')) * 3600 + intval($now->format('i')) * 60 + intval($now->format('s'));
+
+            // Calculate real-time playback offset
+            $videoStartOffset = 0;
+            if ($activeVideo?->behaviour_type === 'realtime' && $blockStartTime) {
+                $blockStartSeconds = $this->timeToMinutes($blockStartTime) * 60;
+                $videoStartOffset = max(0, $currentTotalSeconds - $blockStartSeconds);
+                if ($activeVideo->duration_seconds) {
+                    $videoStartOffset = min($videoStartOffset, $activeVideo->duration_seconds - 1);
+                }
+            }
             $blockEndSeconds = $blockEndMinutes * 60;
             $diff = $blockEndSeconds - $currentTotalSeconds;
             if ($diff <= 0) {
@@ -94,6 +110,8 @@ class CameraController extends Controller
                 'status' => 'online',
                 'video_url' => $videoUrl,
                 'audio_url' => $audioUrl,
+                'behaviour_type' => $activeVideo?->behaviour_type ?? 'loop',
+                'video_start_offset_seconds' => $videoStartOffset,
                 'background_url' => $camera->backgroundUrl(),
                 'background_is_video' => $camera->backgroundIsVideo(),
                 'static_enabled' => $camera->static_enabled,

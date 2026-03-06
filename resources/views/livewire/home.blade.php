@@ -257,7 +257,7 @@
                         </h2>
                     @endif
                     @if ($heroContent?->description)
-                        <p class="text-zinc-400 text-lg leading-relaxed max-w-md">
+                        <p class="text-zinc-400 text-lg leading-relaxed max-w-md font-description">
                             {{ $heroContent->description }}
                         </p>
                     @endif
@@ -421,7 +421,7 @@
                     <div class="text-white">
                         <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wider mb-2" x-text="ep?.title"></h2>
                         <template x-if="ep?.description">
-                            <p class="text-zinc-400 text-sm mb-4 max-w-3xl" x-text="ep.description"></p>
+                            <p class="text-zinc-400 text-sm mb-4 max-w-3xl font-description" x-text="ep.description"></p>
                         </template>
 
                         {{-- Social Links --}}

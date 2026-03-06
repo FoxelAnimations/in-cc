@@ -249,14 +249,14 @@
                                 {{-- Video element (relative so it drives container size) --}}
                                 <video
                                     x-ref="popupVideo"
-                                    autoplay loop playsinline muted
+                                    autoplay playsinline muted
                                     class="relative z-[2] w-full"
                                     x-show="popup.id && getCameraStatus(popup.id) === 'online' && getCameraVideoUrl(popup.id)"
                                     style="display: none; max-height: 70vh;"
                                 ></video>
 
                                 {{-- Separate audio element --}}
-                                <audio x-ref="popupAudio" loop preload="none" style="display: none;"></audio>
+                                <audio x-ref="popupAudio" preload="none" style="display: none;"></audio>
 
                                 {{-- Fallback aspect ratio when offline / no video --}}
                                 <div x-show="!popup.id || getCameraStatus(popup.id) !== 'online' || !getCameraVideoUrl(popup.id)"
@@ -557,10 +557,12 @@ Alpine.data('cameraFeed', () => ({
                         const videoEl = this.$refs['cam' + cam.id];
                         if (videoEl) {
                             if (cam.status === 'online' && cam.video_url) {
+                                videoEl.loop = (cam.behaviour_type !== 'realtime');
                                 videoEl.src = cam.video_url;
                                 videoEl.load();
                                 videoEl.addEventListener('loadeddata', () => {
-                                    videoEl.currentTime = 0.001;
+                                    const offset = cam.video_start_offset_seconds ?? 0;
+                                    videoEl.currentTime = offset > 0 ? offset : 0.001;
                                 }, { once: true });
                             } else {
                                 videoEl.removeAttribute('src');
@@ -827,17 +829,29 @@ Alpine.data('cameraFeed', () => ({
     },
 
     loadPopupVideo() {
-        const videoUrl = this.getCameraVideoUrl(this.popup.id);
-        const audioUrl = this.getCameraAudioUrl(this.popup.id);
+        const cam = this.cameras[this.popup.id];
+        const videoUrl = cam?.video_url ?? '';
+        const audioUrl = cam?.audio_url ?? '';
+        const behaviourType = cam?.behaviour_type ?? 'loop';
+        const offsetSeconds = cam?.video_start_offset_seconds ?? 0;
+        const isRealtime = behaviourType === 'realtime';
         const videoEl = this.$refs.popupVideo;
         const audioEl = this.$refs.popupAudio;
 
         if (videoEl) {
             if (videoUrl) {
-                videoEl.src = videoUrl;
+                videoEl.loop = !isRealtime;
                 videoEl.muted = true;
+                videoEl.src = videoUrl;
                 videoEl.load();
-                videoEl.play().catch(() => {});
+                if (isRealtime && offsetSeconds > 0) {
+                    videoEl.addEventListener('loadedmetadata', () => {
+                        videoEl.currentTime = Math.min(offsetSeconds, Math.max(0, videoEl.duration - 0.5));
+                        videoEl.play().catch(() => {});
+                    }, { once: true });
+                } else {
+                    videoEl.play().catch(() => {});
+                }
             } else {
                 videoEl.pause();
                 videoEl.removeAttribute('src');
@@ -847,9 +861,17 @@ Alpine.data('cameraFeed', () => ({
 
         if (audioEl) {
             if (audioUrl) {
+                audioEl.loop = !isRealtime;
                 audioEl.src = audioUrl;
                 audioEl.load();
-                if (!this.popup.muted) {
+                if (isRealtime && offsetSeconds > 0) {
+                    audioEl.addEventListener('loadedmetadata', () => {
+                        audioEl.currentTime = Math.min(offsetSeconds, Math.max(0, audioEl.duration - 0.5));
+                        if (!this.popup.muted) {
+                            audioEl.play().catch(() => {});
+                        }
+                    }, { once: true });
+                } else if (!this.popup.muted) {
                     audioEl.play().catch(() => {});
                 }
             } else {

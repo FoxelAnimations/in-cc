@@ -123,7 +123,7 @@
                                         </div>
                                     @endif
                                     @if ($episode->description)
-                                        <p class="text-sm text-zinc-500 line-clamp-2">{{ Illuminate\Support\Str::limit($episode->description, 120) }}</p>
+                                        <p class="text-sm text-zinc-500 line-clamp-2 font-description">{{ Illuminate\Support\Str::limit($episode->description, 120) }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -206,7 +206,7 @@
                         </div>
                     </template>
 
-                    <p class="text-zinc-400 text-sm mb-4 max-w-3xl" x-text="episode?.description" x-show="episode?.description"></p>
+                    <p class="text-zinc-400 text-sm mb-4 max-w-3xl font-description" x-text="episode?.description" x-show="episode?.description"></p>
 
                     {{-- Social Links --}}
                     <div class="flex flex-wrap gap-3">

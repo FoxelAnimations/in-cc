@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+[class~="font-description"] {
+    font-family: 'Montserrat', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
 [x-cloak] {
     display: none;
 }
