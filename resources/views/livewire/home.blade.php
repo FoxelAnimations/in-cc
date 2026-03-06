@@ -213,11 +213,11 @@
          HERO SECTION
          ============================================================ --}}
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:pb-20">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-stretch">
-            {{-- Left: Video or Image (1/3) --}}
-            <div class="bg-zinc-900 border border-zinc-800 rounded-sm overflow-hidden relative md:col-span-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+            {{-- Left: Video or Image (1:1) --}}
+            <div class="bg-zinc-900 border border-zinc-800 rounded-sm overflow-hidden relative aspect-square">
                 @if ($heroVideo)
-                    <div x-data="{ muted: true }" class="w-full h-full relative cursor-pointer" @click="muted = !muted; $refs.heroVid.muted = muted">
+                    <div x-data="{ muted: true }" class="absolute inset-0 cursor-pointer" @click="muted = !muted; $refs.heroVid.muted = muted">
                         <video
                             x-ref="heroVid"
                             autoplay
@@ -239,14 +239,14 @@
                         </div>
                     </div>
                 @else
-                    <div class="w-full h-full flex items-center justify-center">
+                    <div class="absolute inset-0 flex items-center justify-center">
                         <img src="{{ asset('img/TVI-Logo-inline.png') }}" alt="TVI" class="max-w-[80%] max-h-[80%] object-contain opacity-80">
                     </div>
                 @endif
             </div>
 
-            {{-- Right: Info + Social Links (2/3) --}}
-            <div class="flex flex-col justify-center gap-6 md:col-span-2">
+            {{-- Right: Info + Social Links (1/2) --}}
+            <div class="flex flex-col justify-center gap-6">
                 <div>
                     @if ($heroContent?->pre_title)
                         <p class="text-sm tracking-[0.3em] uppercase text-zinc-400 mb-4">{{ $heroContent->pre_title }}</p>
