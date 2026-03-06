@@ -17,9 +17,17 @@
                     <p class="mt-1 text-zinc-500 text-sm font-mono">GUID: {{ $beacon->guid }}</p>
                 </div>
             </div>
-            <a href="{{ route('admin.beacons') }}" class="inline-flex items-center border border-zinc-700 text-zinc-400 px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:text-white hover:border-zinc-500">
-                Back
-            </a>
+            <div class="flex items-center gap-3">
+                <button type="button" wire:click="save"
+                    class="inline-flex items-center bg-accent text-black px-6 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="save">Save Changes</span>
+                    <span wire:loading wire:target="save">Saving...</span>
+                </button>
+                <a href="{{ route('admin.beacons') }}" class="inline-flex items-center border border-zinc-700 text-zinc-400 px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:text-white hover:border-zinc-500">
+                    Back
+                </a>
+            </div>
         </div>
 
         @if (session('status'))
@@ -253,11 +261,6 @@
                     @endif
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="submit" class="inline-flex items-center bg-accent text-black px-6 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90">
-                        Save Changes
-                    </button>
-                </div>
             </form>
         @endif
 

@@ -2,9 +2,17 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {{-- Page Title --}}
-        <div class="mb-8">
-            <p class="text-sm uppercase tracking-[0.3em] text-zinc-500">CMS</p>
-            <h1 class="text-4xl font-bold uppercase tracking-wider">{{ __('Create Character') }}</h1>
+        <div class="mb-8 flex items-end justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.3em] text-zinc-500">CMS</p>
+                <h1 class="text-4xl font-bold uppercase tracking-wider">{{ __('Create Character') }}</h1>
+            </div>
+            <button type="button" wire:click="save"
+                class="inline-flex items-center bg-accent text-black px-6 py-3 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90"
+                wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="save">{{ __('Save Character') }}</span>
+                <span wire:loading wire:target="save">{{ __('Saving...') }}</span>
+            </button>
         </div>
 
         @if (session('status'))
@@ -261,12 +269,6 @@
                 </div>
             </div>
 
-            <div class="flex justify-end">
-                <button type="submit" class="inline-flex items-center bg-accent text-black px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90" wire:loading.attr="disabled">
-                    <span wire:loading.remove>{{ __('Save Character') }}</span>
-                    <span wire:loading>{{ __('Saving...') }}</span>
-                </button>
-            </div>
         </form>
     </div>
 </div>

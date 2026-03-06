@@ -12,6 +12,12 @@
                     <h1 class="text-3xl font-bold uppercase tracking-wider">Dagdeel Instellingen</h1>
                 </div>
             </div>
+            <button type="button" wire:click="save"
+                class="inline-flex items-center bg-accent text-black px-6 py-2.5 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90"
+                wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="save">Opslaan</span>
+                <span wire:loading wire:target="save">Opslaan...</span>
+            </button>
         </div>
 
         {{-- Flash Message --}}
@@ -232,13 +238,6 @@
                 </div>
             </div>
 
-            {{-- Save Button --}}
-            <div class="flex justify-end">
-                <button type="submit"
-                    class="px-6 py-2.5 text-sm font-semibold bg-accent text-black uppercase tracking-wider transition hover:brightness-90">
-                    Opslaan
-                </button>
-            </div>
         </form>
     </div>
 </div>
