@@ -234,15 +234,37 @@ class CameraPlanner extends Component
 
     // ─── Static Effect ────────────────────────────────────────
 
-    public function saveStaticSettings(): void
+    public function saveAllSettings(): void
     {
         $this->camera->update([
             'static_enabled' => $this->staticEnabled,
             'static_intensity' => max(0, min(100, $this->staticIntensity)),
         ]);
 
+        foreach ($this->defaultSelections as $slot => $videoId) {
+            $videoId = $videoId ? (int) $videoId : null;
+
+            for ($day = 0; $day < 7; $day++) {
+                CameraDefaultBlock::updateOrCreate(
+                    [
+                        'camera_id' => $this->camera->id,
+                        'day_of_week' => $day,
+                        'time_slot' => $slot,
+                    ],
+                    [
+                        'camera_video_id' => $videoId,
+                    ]
+                );
+            }
+        }
+
         $this->camera->refresh();
-        session()->flash('status', 'Camera effect instellingen opgeslagen.');
+        session()->flash('status', 'Instellingen opgeslagen.');
+    }
+
+    public function saveStaticSettings(): void
+    {
+        $this->saveAllSettings();
     }
 
     public function deleteVideo(int $id): void
@@ -265,24 +287,7 @@ class CameraPlanner extends Component
 
     public function saveDefaults(): void
     {
-        foreach ($this->defaultSelections as $slot => $videoId) {
-            $videoId = $videoId ? (int) $videoId : null;
-
-            for ($day = 0; $day < 7; $day++) {
-                CameraDefaultBlock::updateOrCreate(
-                    [
-                        'camera_id' => $this->camera->id,
-                        'day_of_week' => $day,
-                        'time_slot' => $slot,
-                    ],
-                    [
-                        'camera_video_id' => $videoId,
-                    ]
-                );
-            }
-        }
-
-        session()->flash('status', 'Standaard video\'s opgeslagen.');
+        $this->saveAllSettings();
     }
 
     // ─── Scheduled Videos ────────────────────────────────────

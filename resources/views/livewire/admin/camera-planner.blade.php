@@ -32,6 +32,12 @@
                     <option value="30">30 min</option>
                     <option value="60">60 min</option>
                 </select>
+                <button type="button" wire:click="saveAllSettings"
+                    class="inline-flex items-center bg-accent text-black px-6 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="saveAllSettings">Opslaan</span>
+                    <span wire:loading wire:target="saveAllSettings">Opslaan...</span>
+                </button>
             </div>
         </div>
 
@@ -192,10 +198,6 @@
                                 </div>
                             </div>
                         @endif
-                        <button wire:click="saveStaticSettings"
-                            class="mt-3 w-full bg-accent text-black px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition hover:brightness-90">
-                            Opslaan
-                        </button>
                     </div>
                 </div>
 
@@ -279,10 +281,6 @@
                             </div>
                         @endforeach
 
-                        <button wire:click="saveDefaults"
-                            class="mt-3 w-full bg-accent text-black px-3 py-2 text-xs font-semibold uppercase tracking-wider transition hover:brightness-90">
-                            Opslaan
-                        </button>
                     </div>
                 </div>
             </div>
