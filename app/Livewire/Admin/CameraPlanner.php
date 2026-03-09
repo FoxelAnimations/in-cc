@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Camera;
 use App\Models\CameraDefaultBlock;
+use App\Models\CameraDefaultSound;
 use App\Models\CameraScheduledVideo;
 use App\Models\CameraVideo;
 use Illuminate\Support\Facades\Storage;
@@ -56,6 +57,9 @@ class CameraPlanner extends Component
     // Weather audio volumes
     public int $rainVolume = 50;
     public int $windVolume = 50;
+
+    // Default sound uploads per slot
+    public array $defaultSoundUploads = [];
 
     public function mount(Camera $camera): void
     {
@@ -298,6 +302,43 @@ class CameraPlanner extends Component
         $this->saveAllSettings();
     }
 
+    // ─── Default Sounds ──────────────────────────────────────
+
+    public function uploadDefaultSound(string $slot): void
+    {
+        if (empty($this->defaultSoundUploads[$slot])) {
+            return;
+        }
+
+        $existing = $this->camera->defaultSounds()->where('time_slot', $slot)->first();
+        if ($existing?->sound_path) {
+            Storage::disk('public')->delete($existing->sound_path);
+        }
+
+        $path = $this->defaultSoundUploads[$slot]->store("cameras/{$this->camera->id}/sounds", 'public');
+
+        CameraDefaultSound::updateOrCreate(
+            ['camera_id' => $this->camera->id, 'time_slot' => $slot],
+            ['sound_path' => $path]
+        );
+
+        unset($this->defaultSoundUploads[$slot]);
+        session()->flash('status', 'Standaard geluid geüpload.');
+    }
+
+    public function removeDefaultSound(string $slot): void
+    {
+        $sound = $this->camera->defaultSounds()->where('time_slot', $slot)->first();
+        if ($sound) {
+            if ($sound->sound_path) {
+                Storage::disk('public')->delete($sound->sound_path);
+            }
+            $sound->delete();
+        }
+
+        session()->flash('status', 'Standaard geluid verwijderd.');
+    }
+
     // ─── Scheduled Videos ────────────────────────────────────
 
     public function openScheduleCreate(int $dayOfWeek, string $startTime, string $endTime): void
@@ -482,6 +523,7 @@ class CameraPlanner extends Component
         $videos = $this->camera->videos()->orderBy('sort_order')->get();
         $defaults = $this->camera->defaultBlocks()->with('video')->get();
         $scheduled = $this->camera->scheduledVideos()->with('video')->get();
+        $defaultSounds = $this->camera->defaultSounds()->get()->keyBy('time_slot');
 
         $videosMeta = $videos->mapWithKeys(fn ($v) => [
             $v->id => [
@@ -525,6 +567,7 @@ class CameraPlanner extends Component
             'scheduled' => $scheduled,
             'scheduleData' => $scheduleData,
             'videosMeta' => $videosMeta,
+            'defaultSounds' => $defaultSounds,
         ])->layout('layouts.admin');
     }
 }

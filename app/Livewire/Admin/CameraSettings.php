@@ -4,17 +4,12 @@ namespace App\Livewire\Admin;
 
 use App\Models\CameraSlotSetting;
 use App\Models\SiteSetting;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class CameraSettings extends Component
 {
-    use WithFileUploads;
-
     public array $slots = [];
     public bool $weatherEnabled = true;
-    public array $soundUploads = [];
 
     public function mount(): void
     {
@@ -29,18 +24,16 @@ class CameraSettings extends Component
 
         $this->slots = $settings->map(function ($setting) {
             return [
-                'id'                 => $setting->id,
-                'slot_key'           => $setting->slot_key,
-                'label'              => $setting->label,
-                'start_time'         => $setting->start_time,
-                'end_time'           => $setting->end_time === '24:00' ? '24:00' : $setting->end_time,
-                'bg_color'           => $setting->bg_color ?? '#000000',
-                'overlay_color'      => $setting->overlay_color ?? '#00000000',
-                'is_transition'      => (bool) $setting->is_transition,
-                'rain_enabled'       => (bool) $setting->rain_enabled,
-                'wind_enabled'       => (bool) $setting->wind_enabled,
-                'default_sound_path' => $setting->default_sound_path,
-                'default_sound_url'  => $setting->default_sound_path ? Storage::url($setting->default_sound_path) : null,
+                'id'            => $setting->id,
+                'slot_key'      => $setting->slot_key,
+                'label'         => $setting->label,
+                'start_time'    => $setting->start_time,
+                'end_time'      => $setting->end_time === '24:00' ? '24:00' : $setting->end_time,
+                'bg_color'      => $setting->bg_color ?? '#000000',
+                'overlay_color' => $setting->overlay_color ?? '#00000000',
+                'is_transition' => (bool) $setting->is_transition,
+                'rain_enabled'  => (bool) $setting->rain_enabled,
+                'wind_enabled'  => (bool) $setting->wind_enabled,
             ];
         })->toArray();
     }
@@ -63,47 +56,6 @@ class CameraSettings extends Component
 
         // 24:00 normalizes to 00:00 as a start_time
         $this->slots[$nextIndex]['start_time'] = ($endTime === '24:00') ? '00:00' : $endTime;
-    }
-
-    public function uploadSound(int $index): void
-    {
-        if (empty($this->soundUploads[$index])) {
-            return;
-        }
-
-        $setting = CameraSlotSetting::findOrFail($this->slots[$index]['id']);
-
-        if ($setting->default_sound_path) {
-            Storage::disk('public')->delete($setting->default_sound_path);
-        }
-
-        $path = $this->soundUploads[$index]->store('cameras/slot-sounds', 'public');
-        $setting->update(['default_sound_path' => $path]);
-
-        CameraSlotSetting::clearCache();
-
-        unset($this->soundUploads[$index]);
-        $this->slots[$index]['default_sound_path'] = $path;
-        $this->slots[$index]['default_sound_url'] = Storage::url($path);
-
-        session()->flash('status', 'Standaard geluid geüpload voor ' . $this->slots[$index]['label'] . '.');
-    }
-
-    public function removeSound(int $index): void
-    {
-        $setting = CameraSlotSetting::findOrFail($this->slots[$index]['id']);
-
-        if ($setting->default_sound_path) {
-            Storage::disk('public')->delete($setting->default_sound_path);
-            $setting->update(['default_sound_path' => null]);
-        }
-
-        CameraSlotSetting::clearCache();
-
-        $this->slots[$index]['default_sound_path'] = null;
-        $this->slots[$index]['default_sound_url'] = null;
-
-        session()->flash('status', 'Standaard geluid verwijderd voor ' . $this->slots[$index]['label'] . '.');
     }
 
     public function save(): void

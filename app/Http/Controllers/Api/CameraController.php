@@ -18,10 +18,16 @@ class CameraController extends Controller
         $currentTime = $now->format('H:i');
 
         $cameras = Camera::visible()
-            ->with(['videos', 'defaultBlocks.video', 'scheduledVideos.video'])
+            ->with(['videos', 'defaultBlocks.video', 'scheduledVideos.video', 'defaultSounds'])
             ->get();
 
-        $result = $cameras->map(function (Camera $camera) use ($dayOfWeek, $currentTime, $now) {
+        $currentSlot = CameraDefaultBlock::slotForTime($currentTime);
+
+        $result = $cameras->map(function (Camera $camera) use ($dayOfWeek, $currentTime, $now, $currentSlot) {
+            // Resolve default sound for current slot
+            $defaultSound = $camera->defaultSounds->where('time_slot', $currentSlot)->first();
+            $defaultSoundUrl = $defaultSound?->soundUrl();
+
             if ($camera->is_offline) {
                 return [
                     'id' => $camera->id,
@@ -29,6 +35,7 @@ class CameraController extends Controller
                     'status' => 'offline',
                     'video_url' => null,
                     'audio_url' => null,
+                    'default_sound_url' => $defaultSoundUrl,
                     'background_url' => $camera->backgroundUrl(),
                     'background_is_video' => $camera->backgroundIsVideo(),
                     'static_enabled' => $camera->static_enabled,
@@ -112,6 +119,7 @@ class CameraController extends Controller
                 'status' => 'online',
                 'video_url' => $videoUrl,
                 'audio_url' => $audioUrl,
+                'default_sound_url' => $defaultSoundUrl,
                 'behaviour_type' => $activeVideo?->behaviour_type ?? 'loop',
                 'video_start_offset_seconds' => $videoStartOffset,
                 'background_url' => $camera->backgroundUrl(),

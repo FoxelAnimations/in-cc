@@ -759,8 +759,8 @@ Alpine.data('cameraFeed', () => ({
     },
 
     updateSlotSound() {
-        const slot = this.getCurrentSlot();
-        const soundUrl = slot?.default_sound_url ?? null;
+        const cam = this.cameras[this.popup.id];
+        const soundUrl = cam?.default_sound_url ?? null;
         const slotSoundEl = this.$refs.slotSound;
         if (!slotSoundEl) return;
 

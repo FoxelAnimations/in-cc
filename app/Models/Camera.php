@@ -58,6 +58,11 @@ class Camera extends Model
         return $this->hasMany(CameraScheduledVideo::class);
     }
 
+    public function defaultSounds(): HasMany
+    {
+        return $this->hasMany(CameraDefaultSound::class);
+    }
+
     public function backgroundUrl(): ?string
     {
         return $this->background_path ? Storage::url($this->background_path) : null;

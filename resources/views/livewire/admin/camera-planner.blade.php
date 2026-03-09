@@ -316,6 +316,47 @@
 
                     </div>
                 </div>
+
+                {{-- Default Sounds --}}
+                <div class="bg-zinc-900 border border-zinc-800 rounded-sm">
+                    <div class="px-4 py-3 border-b border-zinc-800">
+                        <h3 class="text-sm font-semibold uppercase tracking-wider text-purple-400">Standaard geluid</h3>
+                        <p class="text-[10px] text-zinc-600 mt-0.5">Achtergrondgeluid per dagdeel. Blijft altijd spelen, ook tijdens geplande video's.</p>
+                    </div>
+                    <div class="p-3">
+                        @foreach (\App\Models\CameraDefaultBlock::slots() as $slot => $bounds)
+                            @php $existingSound = $defaultSounds[$slot] ?? null; @endphp
+                            <div class="mb-3">
+                                <label class="block text-xs text-zinc-500 mb-1">{{ $bounds['label'] }} ({{ $bounds['start'] }}–{{ $bounds['end'] === '24:00' ? '00:00' : $bounds['end'] }})</label>
+
+                                @if ($existingSound)
+                                    <div class="flex items-center gap-2 bg-zinc-800/50 rounded-sm px-2.5 py-1.5">
+                                        <svg class="w-3.5 h-3.5 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                        </svg>
+                                        <span class="text-[11px] text-zinc-300 truncate flex-1">{{ basename($existingSound->sound_path) }}</span>
+                                        <button type="button" wire:click="removeDefaultSound('{{ $slot }}')"
+                                            class="text-red-400 hover:text-red-300 transition text-[10px] uppercase tracking-wider font-semibold shrink-0">
+                                            ✕
+                                        </button>
+                                    </div>
+                                @else
+                                    <div class="flex items-center gap-1.5">
+                                        <input type="file" wire:model="defaultSoundUploads.{{ $slot }}" accept="audio/*"
+                                            class="text-[10px] text-zinc-400 w-full file:mr-2 file:py-1 file:px-2 file:border-0 file:text-[10px] file:font-semibold file:bg-zinc-800 file:text-zinc-300 file:rounded-sm file:cursor-pointer hover:file:bg-zinc-700 file:uppercase file:tracking-wider">
+                                        @if (!empty($defaultSoundUploads[$slot] ?? null))
+                                            <button type="button" wire:click="uploadDefaultSound('{{ $slot }}')"
+                                                class="bg-purple-600 hover:bg-purple-500 text-white px-2 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-sm transition shrink-0">
+                                                Upload
+                                            </button>
+                                        @endif
+                                    </div>
+                                    <div wire:loading wire:target="defaultSoundUploads.{{ $slot }}" class="text-[10px] text-zinc-500 mt-0.5">Uploaden...</div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
 
             {{-- RIGHT: WEEKLY CALENDAR GRID --}}
