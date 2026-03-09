@@ -425,7 +425,7 @@
                     <div class="text-white">
                         <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wider mb-2" x-text="ep?.title"></h2>
                         <template x-if="ep?.description">
-                            <p class="text-zinc-400 text-sm mb-4 max-w-3xl font-description" x-text="ep.description"></p>
+                            <div class="prose prose-invert prose-sm prose-zinc font-description max-w-3xl content-block-text" x-html="ep.description"></div>
                         </template>
 
                         {{-- Social Links --}}

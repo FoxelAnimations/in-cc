@@ -206,7 +206,7 @@
                         </div>
                     </template>
 
-                    <p class="text-zinc-400 text-sm mb-4 max-w-3xl font-description" x-text="episode?.description" x-show="episode?.description"></p>
+                    <div class="prose prose-invert prose-sm prose-zinc font-description max-w-3xl content-block-text" x-html="episode?.description" x-show="episode?.description"></div>
 
                     {{-- Social Links --}}
                     <div class="flex flex-wrap gap-3">

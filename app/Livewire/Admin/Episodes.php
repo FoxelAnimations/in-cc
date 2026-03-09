@@ -98,7 +98,7 @@ class Episodes extends Component
             $episode = Episode::create([
                 'title' => $validated['title'],
                 'category' => $validated['category'],
-                'description' => $validated['description'] ?? null,
+                'description' => isset($validated['description']) ? (trim(strip_tags($validated['description'])) !== '' ? strip_tags($validated['description'], '<p><br><strong><em><u><h2><h3><ul><ol><li>') : null) : null,
                 'source_type' => $validated['source_type'],
                 'video_path' => $videoPath,
                 'youtube_url' => $this->source_type === 'youtube' ? $validated['youtube_url'] : null,
@@ -151,7 +151,7 @@ class Episodes extends Component
             $data = [
                 'title' => $validated['title'],
                 'category' => $validated['category'],
-                'description' => $validated['description'] ?? null,
+                'description' => isset($validated['description']) ? (trim(strip_tags($validated['description'])) !== '' ? strip_tags($validated['description'], '<p><br><strong><em><u><h2><h3><ul><ol><li>') : null) : null,
                 'source_type' => $validated['source_type'],
                 'instagram_url' => $validated['instagram_url'] ?: null,
                 'youtube_link' => $validated['youtube_link'] ?: null,

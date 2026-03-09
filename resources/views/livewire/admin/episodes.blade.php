@@ -168,9 +168,35 @@
                         </div>
 
                         {{-- Description --}}
-                        <div class="mb-4">
+                        <div class="mb-4" wire:ignore
+                             x-data="{
+                                 quill: null,
+                                 init() {
+                                     this.quill = new Quill(this.$refs.descEditor, {
+                                         theme: 'snow',
+                                         placeholder: 'Optionele beschrijving...',
+                                         modules: {
+                                             toolbar: [
+                                                 [{ 'header': [2, 3, false] }],
+                                                 ['bold', 'italic', 'underline'],
+                                                 [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                                 ['clean']
+                                             ]
+                                         }
+                                     });
+                                     const initial = @this.get('description');
+                                     if (initial) {
+                                         this.quill.root.innerHTML = initial;
+                                     }
+                                     this.quill.on('text-change', () => {
+                                         const html = this.quill.root.innerHTML;
+                                         @this.set('description', html === '<p><br></p>' ? '' : html);
+                                     });
+                                 }
+                             }"
+                        >
                             <label class="block text-sm font-medium text-zinc-400 mb-1">{{ __('Description') }}</label>
-                            <textarea wire:model="description" rows="3" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm"></textarea>
+                            <div x-ref="descEditor" class="quill-editor-dark"></div>
                             @error('description') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
