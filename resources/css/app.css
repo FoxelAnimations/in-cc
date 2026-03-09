@@ -82,40 +82,31 @@
     pointer-events: none;
 }
 
-/* Content block rich text */
-.content-block-text p {
+/* Content block rich text — tighter spacing overrides for prose */
+.content-block-text.prose p {
+    margin-top: 0;
     margin-bottom: 0.4em;
 }
-.content-block-text p:last-child {
+.content-block-text.prose p:last-child {
     margin-bottom: 0;
 }
-.content-block-text h2 {
-    color: #fff;
-    font-size: 1.5em;
-    font-weight: 700;
+.content-block-text.prose h2 {
+    margin-top: 0.6em;
     margin-bottom: 0.3em;
 }
-.content-block-text h3 {
-    color: #fff;
-    font-size: 1.2em;
-    font-weight: 600;
+.content-block-text.prose h3 {
+    margin-top: 0.5em;
     margin-bottom: 0.3em;
 }
-.content-block-text strong {
-    color: #fff;
-    font-weight: 600;
-}
-.content-block-text ul,
-.content-block-text ol {
-    padding-left: 1.4em;
+.content-block-text.prose ul,
+.content-block-text.prose ol {
+    margin-top: 0.3em;
     margin-bottom: 0.4em;
 }
-.content-block-text ul {
-    list-style-type: disc;
-}
-.content-block-text ol {
-    list-style-type: decimal;
-}
-.content-block-text li {
+.content-block-text.prose li {
+    margin-top: 0;
     margin-bottom: 0.15em;
+}
+.content-block-text.prose strong {
+    color: #fff;
 }
