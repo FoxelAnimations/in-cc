@@ -173,6 +173,37 @@
                                     </label>
                                 </div>
                             </div>
+
+                            {{-- Row 5: Default sound upload --}}
+                            <div class="mt-3 pt-3 border-t border-zinc-800/50">
+                                <span class="text-xs text-zinc-500 uppercase tracking-wider">Standaard geluid</span>
+                                <p class="text-[10px] text-zinc-600 mt-0.5 mb-2">Achtergrondgeluid dat continu loopt tijdens dit dagdeel (ook tijdens geplande video's).</p>
+
+                                @if ($slot['default_sound_url'] ?? null)
+                                    <div class="flex items-center gap-3 bg-zinc-800/50 rounded-sm px-3 py-2">
+                                        <svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                        </svg>
+                                        <span class="text-xs text-zinc-300 truncate flex-1">{{ basename($slot['default_sound_path']) }}</span>
+                                        <button type="button" wire:click="removeSound({{ $index }})"
+                                            class="text-red-400 hover:text-red-300 transition text-xs uppercase tracking-wider font-semibold">
+                                            Verwijderen
+                                        </button>
+                                    </div>
+                                @else
+                                    <div class="flex items-center gap-2">
+                                        <input type="file" wire:model="soundUploads.{{ $index }}" accept="audio/*"
+                                            class="text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:border-0 file:text-xs file:font-semibold file:bg-zinc-800 file:text-zinc-300 file:rounded-sm file:cursor-pointer hover:file:bg-zinc-700 file:uppercase file:tracking-wider">
+                                        @if (!empty($soundUploads[$index] ?? null))
+                                            <button type="button" wire:click="uploadSound({{ $index }})"
+                                                class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wider rounded-sm transition">
+                                                Upload
+                                            </button>
+                                        @endif
+                                    </div>
+                                    <div wire:loading wire:target="soundUploads.{{ $index }}" class="text-xs text-zinc-500 mt-1">Uploaden...</div>
+                                @endif
+                            </div>
                         </div>
                     @endforeach
                 </div>

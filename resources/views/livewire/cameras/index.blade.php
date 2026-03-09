@@ -225,6 +225,9 @@
                                 {{-- Separate audio element --}}
                                 <audio x-ref="popupAudio" preload="none" style="display: none;"></audio>
 
+                                {{-- Default slot sound (ambient, loops continuously per time slot) --}}
+                                <audio x-ref="slotSound" preload="none" loop style="display: none;"></audio>
+
                                 {{-- Fallback aspect ratio when offline / no video --}}
                                 <div x-show="!popup.id || getCameraStatus(popup.id) !== 'online' || !getCameraVideoUrl(popup.id)"
                                     class="w-[640px] max-w-full aspect-video"></div>
@@ -321,6 +324,7 @@ Alpine.data('cameraFeed', () => ({
     rainAnimFrame: null,
     rainDrops: [],
     popupPollTimer: null,
+    currentSlotSoundUrl: null,
 
     // Weather audio system (Web Audio API)
     slotsData: {},
@@ -498,11 +502,15 @@ Alpine.data('cameraFeed', () => ({
             if (!res.ok) throw new Error('API returned ' + res.status);
             const data = await res.json();
 
-            // Process slot data for sky colors and weather audio
+            // Process slot data for sky colors, weather audio, and slot sounds
             if (data.slots) {
                 this.slotsData = data.slots;
                 this.slotKeyframes = this.buildKeyframes(data.slots);
                 this.updateSkyColor();
+                // Update slot sound if popup is open
+                if (this.popup.open) {
+                    this.updateSlotSound();
+                }
             }
 
             // Weather toggle from API
@@ -750,6 +758,50 @@ Alpine.data('cameraFeed', () => ({
         return null;
     },
 
+    updateSlotSound() {
+        const slot = this.getCurrentSlot();
+        const soundUrl = slot?.default_sound_url ?? null;
+        const slotSoundEl = this.$refs.slotSound;
+        if (!slotSoundEl) return;
+
+        // Only reload if URL changed
+        if (soundUrl !== this.currentSlotSoundUrl) {
+            this.currentSlotSoundUrl = soundUrl;
+            if (soundUrl) {
+                slotSoundEl.src = soundUrl;
+                slotSoundEl.load();
+                if (!this.popup.muted) {
+                    slotSoundEl.play().catch(() => {});
+                }
+            } else {
+                slotSoundEl.pause();
+                slotSoundEl.removeAttribute('src');
+                slotSoundEl.load();
+            }
+        }
+    },
+
+    startSlotSound() {
+        const slotSoundEl = this.$refs.slotSound;
+        if (!slotSoundEl) return;
+
+        this.updateSlotSound();
+
+        if (this.currentSlotSoundUrl && !this.popup.muted) {
+            slotSoundEl.play().catch(() => {});
+        }
+    },
+
+    stopSlotSound() {
+        const slotSoundEl = this.$refs.slotSound;
+        if (slotSoundEl) {
+            slotSoundEl.pause();
+            slotSoundEl.removeAttribute('src');
+            slotSoundEl.load();
+        }
+        this.currentSlotSoundUrl = null;
+    },
+
     initWeatherAudio() {
         if (this.weatherAudioCtx) return;
         this.weatherAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -897,7 +949,10 @@ Alpine.data('cameraFeed', () => ({
         this.popup.name = name;
         this.popup.muted = true;
 
-        this.$nextTick(() => this.loadPopupVideo());
+        this.$nextTick(() => {
+            this.loadPopupVideo();
+            this.updateSlotSound(); // Preload slot sound (plays on unmute)
+        });
         this.startPopupPolling();
     },
 
@@ -921,6 +976,7 @@ Alpine.data('cameraFeed', () => ({
             bgVideoEl.removeAttribute('src');
             bgVideoEl.load();
         }
+        this.stopSlotSound();
         this.stopWeatherAudio();
         this.popup.open = false;
         this.popup.id = null;
@@ -1008,6 +1064,15 @@ Alpine.data('cameraFeed', () => ({
                 audioEl.pause();
             } else {
                 audioEl.play().catch(() => {});
+            }
+        }
+        // Slot default sound
+        const slotSoundEl = this.$refs.slotSound;
+        if (slotSoundEl && slotSoundEl.src) {
+            if (this.popup.muted) {
+                slotSoundEl.pause();
+            } else {
+                slotSoundEl.play().catch(() => {});
             }
         }
         // Weather audio
@@ -1109,6 +1174,7 @@ Alpine.data('cameraFeed', () => ({
         if (this.staticAnimFrame) cancelAnimationFrame(this.staticAnimFrame);
         this.stopPopupPolling();
         this.stopRain();
+        this.stopSlotSound();
         this.stopWeatherAudio();
         if (this.weatherAudioCtx) {
             this.weatherAudioCtx.close().catch(() => {});
