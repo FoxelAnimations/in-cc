@@ -110,3 +110,6 @@
 .content-block-text.prose strong {
     color: #fff;
 }
+.content-block-text.prose {
+    font-family: 'Montserrat', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}

@@ -69,7 +69,7 @@
                                     <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold uppercase leading-none mb-4">{{ $block->title }}</h2>
                                 @endif
                                 @if ($block->text)
-                                    <p class="text-zinc-400 text-lg leading-relaxed">{{ $block->text }}</p>
+                                    <div class="prose prose-invert prose-lg prose-zinc font-description max-w-none break-words content-block-text">{!! $block->text !!}</div>
                                 @endif
                                 @if ($block->hasButton())
                                     <div class="mt-6">
