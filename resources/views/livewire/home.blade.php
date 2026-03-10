@@ -348,10 +348,23 @@
                                             @click="showEp({
                                                 title: {{ Js::from($episode->title) }},
                                                 description: {{ Js::from($episode->description) }},
-                                                sourceType: {{ Js::from($episode->source_type) }},
+                                                isYoutube: {{ $episode->isYoutube() ? 'true' : 'false' }},
+                                                embedUrl: {{ Js::from($episode->youtubeEmbedUrl()) }},
                                                 videoUrl: {{ Js::from($episode->videoUrl()) }},
-                                                youtubeEmbed: {{ Js::from($episode->youtubeEmbedUrl()) }},
                                                 thumbnail: {{ Js::from($episode->thumbnailUrl()) }},
+                                                characters: {{ Js::from($episode->characters->map(fn($c) => [
+                                                    'name' => $c->full_name,
+                                                    'nickname' => $c->nick_name,
+                                                    'age' => $c->age,
+                                                    'job' => $c->job?->title,
+                                                    'bio' => $c->bio,
+                                                    'image' => ($c->profile_photo_path ?? $c->profile_image_path) ? Storage::url($c->profile_photo_path ?? $c->profile_image_path) : null,
+                                                    'imageHover' => ($c->profile_photo_path ? $c->profile_photo_hover_path : $c->profile_image_hover_path) ? Storage::url($c->profile_photo_path ? $c->profile_photo_hover_path : $c->profile_image_hover_path) : null,
+                                                    'fullBody' => $c->full_body_image_path ? Storage::url($c->full_body_image_path) : null,
+                                                    'fullBodyHover' => $c->full_body_image_hover_path ? Storage::url($c->full_body_image_hover_path) : null,
+                                                    'background' => $c->background_image_path ? Storage::url($c->background_image_path) : null,
+                                                    'links' => $c->socialLinks->map(fn($l) => ['title' => $l->title, 'url' => $l->url]),
+                                                ])) }},
                                                 instagram: {{ Js::from($episode->instagram_url) }},
                                                 youtube: {{ Js::from($episode->youtube_link) }},
                                                 tiktok: {{ Js::from($episode->tiktok_url) }},
@@ -440,14 +453,11 @@
                     {{-- Video Player (shown after age confirmation or if not restricted) --}}
                     <template x-if="!ep?.ageRestricted || ageConfirmed">
                         <div class="aspect-video bg-black rounded-none md:rounded-sm overflow-hidden mb-0 md:mb-4">
-                            <template x-if="ep?.sourceType === 'youtube' && ep?.youtubeEmbed">
-                                <iframe :src="ep.youtubeEmbed" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                            <template x-if="ep && ep.isYoutube && ep.embedUrl">
+                                <iframe :src="ep.embedUrl" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                             </template>
-                            <template x-if="ep?.sourceType === 'upload' && ep?.videoUrl">
+                            <template x-if="ep && !ep.isYoutube && ep.videoUrl">
                                 <video controls autoplay class="w-full h-full" :src="ep.videoUrl"></video>
-                            </template>
-                            <template x-if="(!ep?.youtubeEmbed && !ep?.videoUrl) && ep?.thumbnail">
-                                <img :src="ep.thumbnail" class="w-full h-full object-cover">
                             </template>
                         </div>
                     </template>
@@ -455,9 +465,21 @@
                     {{-- Episode Info --}}
                     <div class="text-white px-4 py-4 md:px-0 md:py-0">
                         <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-wider mb-2" x-text="ep?.title"></h2>
-                        <template x-if="ep?.description">
-                            <div class="prose prose-invert prose-sm prose-zinc font-description max-w-3xl content-block-text" x-html="ep.description"></div>
+
+                        {{-- Characters (clickable) --}}
+                        <template x-if="ep?.characters?.length > 0">
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <template x-for="(c, i) in ep.characters" :key="i">
+                                    <button
+                                        @click.stop="$dispatch('character-popup', c)"
+                                        class="px-2 py-1 text-xs bg-zinc-800 text-accent rounded-sm uppercase tracking-wider hover:bg-zinc-700 transition cursor-pointer"
+                                        x-text="c.name"
+                                    ></button>
+                                </template>
+                            </div>
                         </template>
+
+                        <div class="prose prose-invert prose-sm prose-zinc font-description max-w-3xl content-block-text" x-html="ep?.description" x-show="ep?.description"></div>
 
                         {{-- Social Links --}}
                         <div class="flex flex-wrap gap-3">
