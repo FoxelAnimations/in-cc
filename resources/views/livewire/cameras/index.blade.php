@@ -90,9 +90,6 @@
                                 <p class="text-zinc-600 text-[10px] uppercase tracking-wider">Geen signaal</p>
                             </div>
 
-                            {{-- Rain effect on card --}}
-                            <canvas class="absolute inset-0 w-full h-full rain-canvas pointer-events-none z-[4]" data-type="card"></canvas>
-
                             {{-- Camera static effect --}}
                             <div class="absolute inset-0 pointer-events-none z-[5]" x-show="getCameraStaticEnabled({{ $camera->id }})" x-cloak>
                                 <div class="camera-scanlines absolute inset-0" :style="{ opacity: getCameraStaticIntensity({{ $camera->id }}) / 200 }"></div>
@@ -217,8 +214,6 @@
                                             </div>
                                         </template>
                                     </div>
-                                    {{-- Rain canvas --}}
-                                    <canvas class="absolute inset-0 w-full h-full rain-canvas" data-type="popup"></canvas>
                                 </div>
 
                                 {{-- Video element (relative so it drives container size) --}}
@@ -243,6 +238,9 @@
                                 {{-- Color overlay --}}
                                 <div class="absolute inset-0 z-[3] pointer-events-none"
                                     :style="{ backgroundColor: overlayColor }"></div>
+
+                                {{-- Rain effect (in front of video) --}}
+                                <canvas class="absolute inset-0 w-full h-full rain-canvas pointer-events-none z-[4]" x-show="weatherEnabled" x-cloak></canvas>
 
                                 {{-- Offline --}}
                                 <div x-show="!popup.id || getCameraStatus(popup.id) !== 'online' || !getCameraVideoUrl(popup.id)"
@@ -434,8 +432,8 @@ Alpine.data('cameraFeed', () => ({
                     drops.push({
                         x: Math.random() * (w + 40) - 20,
                         y: -10 - Math.random() * 30,
-                        speed: 4 + Math.random() * 6 + intensity * 4,
-                        length: 8 + Math.random() * 12 + intensity * 8,
+                        speed: 10 + Math.random() * 10 + intensity * 8,
+                        length: 12 + Math.random() * 16 + intensity * 10,
                         opacity: 0.15 + Math.random() * 0.25 + intensity * 0.15,
                         width: 0.5 + Math.random() * 0.8,
                     });
