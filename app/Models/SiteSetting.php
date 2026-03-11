@@ -23,6 +23,7 @@ class SiteSetting extends Model
         'show_episodes',
         'show_shorts',
         'show_minis',
+        'show_specials',
         'carousel_title',
     ];
 
@@ -36,6 +37,7 @@ class SiteSetting extends Model
             'show_episodes' => 'boolean',
             'show_shorts' => 'boolean',
             'show_minis' => 'boolean',
+            'show_specials' => 'boolean',
         ];
     }
 

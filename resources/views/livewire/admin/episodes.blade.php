@@ -79,7 +79,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="inline-flex px-2 py-1 text-xs font-semibold uppercase tracking-wider {{ $episode->category === 'episode' ? 'bg-blue-900/30 text-blue-400' : ($episode->category === 'short' ? 'bg-purple-900/30 text-purple-400' : 'bg-emerald-900/30 text-emerald-400') }}">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold uppercase tracking-wider {{ $episode->category === 'episode' ? 'bg-blue-900/30 text-blue-400' : ($episode->category === 'short' ? 'bg-purple-900/30 text-purple-400' : ($episode->category === 'special' ? 'bg-amber-900/30 text-amber-400' : 'bg-emerald-900/30 text-emerald-400')) }}">
                                             {{ $episode->category }}
                                         </span>
                                     </td>
@@ -164,6 +164,10 @@
                                     class="px-4 py-2 text-sm font-semibold uppercase tracking-wider transition {{ $category === 'mini' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white' }}">
                                     {{ __('Mini') }}
                                 </button>
+                                <button type="button" wire:click="$set('category', 'special')"
+                                    class="px-4 py-2 text-sm font-semibold uppercase tracking-wider transition {{ $category === 'special' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white' }}">
+                                    {{ __('Special') }}
+                                </button>
                             </div>
                         </div>
 
@@ -181,6 +185,7 @@
                                                  ['bold', 'italic', 'underline'],
                                                  [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                                                  [{ 'align': [] }],
+                                                 ['link'],
                                                  ['clean']
                                              ]
                                          }

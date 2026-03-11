@@ -30,6 +30,7 @@ class Home extends Component
             'latestEpisodes' => ($settings?->show_episodes ?? true) ? Episode::with(['characters.job', 'characters.socialLinks'])->where('category', 'episode')->where('visible', true)->latest()->take(5)->get() : collect(),
             'latestShorts' => ($settings?->show_shorts ?? true) ? Episode::with(['characters.job', 'characters.socialLinks'])->where('category', 'short')->where('visible', true)->latest()->take(5)->get() : collect(),
             'latestMinis' => ($settings?->show_minis ?? true) ? Episode::with(['characters.job', 'characters.socialLinks'])->where('category', 'mini')->where('visible', true)->latest()->take(5)->get() : collect(),
+            'latestSpecials' => ($settings?->show_specials ?? true) ? Episode::with(['characters.job', 'characters.socialLinks'])->where('category', 'special')->where('visible', true)->latest()->take(5)->get() : collect(),
             'socialLinks' => SocialLink::whereNotNull('url')->where('url', '!=', '')->orderBy('sort_order')->get(),
             'blocksAbove' => ContentBlock::active()->aboveEpisodes()->get(),
             'blocksBelow' => ContentBlock::active()->belowEpisodes()->get(),

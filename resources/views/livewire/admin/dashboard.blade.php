@@ -115,9 +115,35 @@
                                 <input type="text" wire:model="heroTitle" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="The Visual Identity">
                                 @error('heroTitle') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
                             </div>
-                            <div>
+                            <div wire:ignore
+                                 x-data="{
+                                     quill: null,
+                                     init() {
+                                         this.quill = new Quill(this.$refs.heroDescEditor, {
+                                             theme: 'snow',
+                                             placeholder: 'A creative universe...',
+                                             modules: {
+                                                 toolbar: [
+                                                     ['bold', 'italic', 'underline'],
+                                                     [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                                     ['link'],
+                                                     ['clean'],
+                                                 ]
+                                             }
+                                         });
+                                         const initial = @this.get('heroDescription');
+                                         if (initial) {
+                                             this.quill.root.innerHTML = initial;
+                                         }
+                                         this.quill.on('text-change', () => {
+                                             const html = this.quill.root.innerHTML;
+                                             @this.set('heroDescription', html === '<p><br></p>' ? '' : html);
+                                         });
+                                     }
+                                 }"
+                            >
                                 <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Description') }}</label>
-                                <textarea wire:model="heroDescription" rows="4" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="A creative universe..."></textarea>
+                                <div x-ref="heroDescEditor" class="quill-editor-dark"></div>
                                 @error('heroDescription') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
                             </div>
                             <button type="submit" class="inline-flex items-center bg-accent text-black px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90">
@@ -268,6 +294,11 @@
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" wire:model.live="showMinis" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
                         <span class="text-sm font-medium text-white">{{ __('Show Minis') }}</span>
+                    </label>
+
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" wire:model.live="showSpecials" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
+                        <span class="text-sm font-medium text-white">{{ __('Show Specials') }}</span>
                     </label>
 
                     <button type="submit" class="inline-flex items-center bg-accent text-black px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90">

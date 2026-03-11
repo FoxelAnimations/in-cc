@@ -266,9 +266,9 @@
                         </h2>
                     @endif
                     @if ($heroContent?->description)
-                        <p class="text-zinc-400 text-lg leading-relaxed max-w-md font-description">
-                            {{ $heroContent->description }}
-                        </p>
+                        <div class="text-zinc-400 text-lg leading-relaxed font-description prose prose-invert prose-zinc prose-lg content-block-text">
+                            {!! $heroContent->description !!}
+                        </div>
                     @endif
                 </div>
 
@@ -331,6 +331,7 @@
             ['items' => $latestEpisodes, 'title' => 'Episodes'],
             ['items' => $latestShorts, 'title' => 'Shorts'],
             ['items' => $latestMinis, 'title' => 'Minis'],
+            ['items' => $latestSpecials, 'title' => 'Specials'],
         ] as $section)
             @if ($section['items']->isNotEmpty())
                 <section class="py-8 md:py-12 scroll-mt-16">

@@ -53,12 +53,18 @@
                 class="px-6 py-2.5 text-sm font-bold uppercase tracking-wider transition">
                 Minis
             </button>
+            <button @click="tab = 'specials'"
+                :class="tab === 'specials' ? 'bg-accent text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white'"
+                class="px-6 py-2.5 text-sm font-bold uppercase tracking-wider transition">
+                Specials
+            </button>
         </div>
 
         @foreach ([
             ['key' => 'episodes', 'items' => $episodes],
             ['key' => 'shorts', 'items' => $shorts],
             ['key' => 'minis', 'items' => $minis],
+            ['key' => 'specials', 'items' => $specials],
         ] as $section)
             <div x-show="tab === '{{ $section['key'] }}'" x-cloak>
                 @if ($section['items']->isEmpty())

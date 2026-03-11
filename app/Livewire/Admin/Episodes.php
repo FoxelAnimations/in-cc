@@ -35,7 +35,7 @@ class Episodes extends Component
     {
         $rules = [
             'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'in:episode,short,mini'],
+            'category' => ['required', 'in:episode,short,mini,special'],
             'description' => ['nullable', 'string'],
             'source_type' => ['required', 'in:upload,youtube'],
             'thumbnail' => ['nullable', 'image', 'max:2048'],

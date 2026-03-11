@@ -34,6 +34,7 @@ class Dashboard extends Component
     public bool $showEpisodes = true;
     public bool $showShorts = true;
     public bool $showMinis = true;
+    public bool $showSpecials = true;
     public string $carouselTitle = '';
 
     public function mount(): void
@@ -155,7 +156,7 @@ class Dashboard extends Component
         $this->validate([
             'heroPreTitle' => ['required', 'string', 'max:255'],
             'heroTitle' => ['required', 'string', 'max:255'],
-            'heroDescription' => ['required', 'string', 'max:1000'],
+            'heroDescription' => ['required', 'string', 'max:5000'],
         ]);
 
         HeroContent::first()?->update([
@@ -288,6 +289,7 @@ class Dashboard extends Component
             $this->showEpisodes = $settings->show_episodes ?? true;
             $this->showShorts = $settings->show_shorts ?? true;
             $this->showMinis = $settings->show_minis ?? true;
+            $this->showSpecials = $settings->show_specials ?? true;
             $this->carouselTitle = $settings->carousel_title ?? '';
         }
     }
@@ -298,6 +300,7 @@ class Dashboard extends Component
             'show_episodes' => $this->showEpisodes,
             'show_shorts' => $this->showShorts,
             'show_minis' => $this->showMinis,
+            'show_specials' => $this->showSpecials,
             'carousel_title' => $this->carouselTitle ?: null,
         ]);
 
