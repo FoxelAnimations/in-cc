@@ -528,5 +528,26 @@
         </section>
     @endif
 
+    {{-- ============================================================
+         COLLAB LOGO SLIDER
+         ============================================================ --}}
+    @if ($showCollabs && $collabLogos->isNotEmpty())
+        <section class="py-12 md:py-16 border-t border-zinc-800/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-sm uppercase tracking-[0.3em] text-zinc-500 text-center mb-8">{{ __('Collabs') }}</h2>
+                <div class="collab-logo-slider swiper" wire:ignore>
+                    <div class="swiper-wrapper items-center">
+                        @foreach ($collabLogos as $collab)
+                            <div class="swiper-slide">
+                                <a href="{{ route('collabs.show', $collab->slug) }}" class="flex items-center justify-center h-16 px-4 opacity-50 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0">
+                                    <img src="{{ Storage::url($collab->logo_image) }}" alt="{{ $collab->title }}" class="max-h-full max-w-full object-contain">
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
 
 </div>

@@ -6,6 +6,8 @@ use App\Livewire\Episodes\Show as EpisodeShow;
 use App\Livewire\UserDashboard;
 use App\Livewire\Blog;
 use App\Livewire\BlogShow;
+use App\Livewire\CollabIndex;
+use App\Livewire\CollabShow;
 use App\Livewire\Home;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\Characters as AdminCharacters;
@@ -19,6 +21,7 @@ use App\Livewire\Admin\BlockedVisitors;
 use App\Livewire\Admin\ChatList;
 use App\Livewire\Admin\ChatView;
 use App\Livewire\Admin\BlogPosts as AdminBlogPosts;
+use App\Livewire\Admin\Collabs as AdminCollabs;
 use App\Livewire\Admin\ContentBlocks;
 use App\Livewire\Admin\Cameras as AdminCameras;
 use App\Livewire\Admin\CameraPlanner;
@@ -36,6 +39,8 @@ Route::get('/personages', CharacterIndex::class)->name('characters.index');
 Route::get('/episodes', EpisodeShow::class)->name('episodes.index');
 Route::get('/blog', Blog::class)->name('blog');
 Route::get('/blog/{slug}', BlogShow::class)->name('blog.show');
+Route::get('/collabs', CollabIndex::class)->name('collabs');
+Route::get('/collabs/{slug}', CollabShow::class)->name('collabs.show');
 Route::get('/cameras', CameraIndex::class)->name('cameras.index');
 
 // Public beacon scan endpoint (rate limiting handled inside controller to allow logging with flag)
@@ -64,6 +69,7 @@ Route::middleware([
         Route::get('/admin/chats/{conversation}', ChatView::class)->name('admin.chats.view');
         Route::get('/admin/content-blocks', ContentBlocks::class)->name('admin.content-blocks');
         Route::get('/admin/blog', AdminBlogPosts::class)->name('admin.blog');
+        Route::get('/admin/collabs', AdminCollabs::class)->name('admin.collabs');
         Route::get('/admin/cameras', AdminCameras::class)->name('admin.cameras');
         Route::get('/admin/cameras/settings', CameraSettings::class)->name('admin.camera-settings');
         Route::get('/admin/cameras/{camera}/planner', CameraPlanner::class)->name('admin.camera-planner');

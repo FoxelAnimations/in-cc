@@ -2,6 +2,7 @@ import './bootstrap';
 import $ from 'jquery'
 import Sortable from 'sortablejs'
 import Swiper from 'swiper'
+import { Autoplay } from 'swiper/modules'
 
 window.$ = $
 window.jQuery = $
@@ -298,5 +299,26 @@ function initEpisodeCarousels() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => { initMobileCarousel(); initDesktopCarousel(); initEpisodeCarousels(); });
-document.addEventListener('livewire:navigated', () => { initMobileCarousel(); initDesktopCarousel(); initEpisodeCarousels(); });
+// ─── Collab Logo Slider (Swiper) ─────────────────────────────
+function initCollabLogoSlider() {
+    document.querySelectorAll('.collab-logo-slider').forEach(el => {
+        if (el.swiper) return;
+        new Swiper(el, {
+            modules: [Autoplay],
+            slidesPerView: 2,
+            spaceBetween: 24,
+            grabCursor: true,
+            speed: 500,
+            loop: true,
+            autoplay: { delay: 3000, disableOnInteraction: false },
+            breakpoints: {
+                640: { slidesPerView: 3, spaceBetween: 32 },
+                768: { slidesPerView: 4, spaceBetween: 40 },
+                1024: { slidesPerView: 5, spaceBetween: 48 },
+            },
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => { initMobileCarousel(); initDesktopCarousel(); initEpisodeCarousels(); initCollabLogoSlider(); });
+document.addEventListener('livewire:navigated', () => { initMobileCarousel(); initDesktopCarousel(); initEpisodeCarousels(); initCollabLogoSlider(); });

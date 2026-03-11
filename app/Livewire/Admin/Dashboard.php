@@ -35,6 +35,7 @@ class Dashboard extends Component
     public bool $showShorts = true;
     public bool $showMinis = true;
     public bool $showSpecials = true;
+    public bool $showCollabs = false;
     public string $carouselTitle = '';
 
     public function mount(): void
@@ -290,6 +291,7 @@ class Dashboard extends Component
             $this->showShorts = $settings->show_shorts ?? true;
             $this->showMinis = $settings->show_minis ?? true;
             $this->showSpecials = $settings->show_specials ?? true;
+            $this->showCollabs = $settings->show_collabs ?? false;
             $this->carouselTitle = $settings->carousel_title ?? '';
         }
     }
@@ -301,6 +303,7 @@ class Dashboard extends Component
             'show_shorts' => $this->showShorts,
             'show_minis' => $this->showMinis,
             'show_specials' => $this->showSpecials,
+            'show_collabs' => $this->showCollabs,
             'carousel_title' => $this->carouselTitle ?: null,
         ]);
 

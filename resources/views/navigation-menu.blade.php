@@ -15,6 +15,9 @@
                 <a href="{{ route('episodes.index') }}" class="{{ request()->routeIs('episodes.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">AFLEVERINGEN</a>
                 <a href="{{ route('characters.index') }}" class="{{ request()->routeIs('characters.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">PERSONAGES</a>
                 <a href="{{ route('blog') }}" class="{{ request()->routeIs('blog') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">BLOG</a>
+                @if(\App\Models\SiteSetting::first()?->show_collabs)
+                    <a href="{{ route('collabs') }}" class="{{ request()->routeIs('collabs*') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">COLLABS</a>
+                @endif
                 <a href="{{ route('cameras.index') }}" class="{{ request()->routeIs('cameras.index') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">CAMERA'S</a>
                 @auth
                     @can('access-admin')
@@ -81,6 +84,9 @@
             <a href="{{ route('episodes.index') }}" @click="open = false" class="{{ request()->routeIs('episodes.index') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">AFLEVERINGEN</a>
             <a href="{{ route('characters.index') }}" @click="open = false" class="{{ request()->routeIs('characters.index') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">PERSONAGES</a>
             <a href="{{ route('blog') }}" @click="open = false" class="{{ request()->routeIs('blog') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">BLOG</a>
+            @if(\App\Models\SiteSetting::first()?->show_collabs)
+                <a href="{{ route('collabs') }}" @click="open = false" class="{{ request()->routeIs('collabs*') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">COLLABS</a>
+            @endif
             <a href="{{ route('cameras.index') }}" @click="open = false" class="{{ request()->routeIs('cameras.index') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">CAMERA'S</a>
             @auth
                 @can('access-admin')
