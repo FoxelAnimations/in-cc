@@ -11,7 +11,8 @@ class BlogShow extends Component
 
     public function mount(string $slug): void
     {
-        $this->post = BlogPost::where('slug', $slug)
+        $this->post = BlogPost::with('episode')
+            ->where('slug', $slug)
             ->where('is_visible', true)
             ->firstOrFail();
     }

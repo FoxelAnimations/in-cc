@@ -9,6 +9,11 @@ class BlogPost extends Model
 {
     protected $guarded = [];
 
+    public function episode()
+    {
+        return $this->belongsTo(Episode::class);
+    }
+
     protected $casts = [
         'is_published' => 'boolean',
         'is_visible' => 'boolean',

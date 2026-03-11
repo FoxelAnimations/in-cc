@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\BlogPost;
+use App\Models\Episode;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -19,6 +20,7 @@ class BlogPosts extends Component
     public string $content = '';
     public $featured_image = null;
     public ?string $existing_image_path = null;
+    public $episode_id = null;
     public string $button_label = '';
     public string $button_url = '';
     public bool $button_new_tab = false;
@@ -32,6 +34,7 @@ class BlogPosts extends Component
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'content' => ['nullable', 'string', 'max:50000'],
             'featured_image' => ['nullable', 'image', 'max:4096'],
+            'episode_id' => ['nullable', 'exists:episodes,id'],
             'button_label' => ['nullable', 'string', 'max:255'],
             'button_url' => ['nullable', 'url', 'max:500'],
             'button_new_tab' => ['boolean'],
@@ -53,6 +56,7 @@ class BlogPosts extends Component
         $this->title = $post->title;
         $this->excerpt = $post->excerpt ?? '';
         $this->content = $post->content ?? '';
+        $this->episode_id = $post->episode_id;
         $this->button_label = $post->button_label ?? '';
         $this->button_url = $post->button_url ?? '';
         $this->button_new_tab = $post->button_new_tab;
@@ -67,7 +71,7 @@ class BlogPosts extends Component
         $this->validate();
 
         $cleanContent = $this->content
-            ? strip_tags($this->content, '<p><br><strong><em><u><h2><h3><ul><ol><li>')
+            ? strip_tags($this->content, '<p><br><strong><em><u><h2><h3><ul><ol><li><a>')
             : null;
         if ($cleanContent && trim(strip_tags($cleanContent)) === '') {
             $cleanContent = null;
@@ -77,6 +81,7 @@ class BlogPosts extends Component
             'title' => $this->title,
             'excerpt' => $this->excerpt ?: null,
             'content' => $cleanContent,
+            'episode_id' => $this->episode_id ?: null,
             'button_label' => $this->button_label ?: null,
             'button_url' => $this->button_url ?: null,
             'button_new_tab' => $this->button_new_tab,
@@ -158,7 +163,7 @@ class BlogPosts extends Component
         $this->reset([
             'editingId', 'title', 'excerpt', 'content', 'featured_image',
             'button_label', 'button_url', 'button_new_tab',
-            'existing_image_path',
+            'existing_image_path', 'episode_id',
         ]);
         $this->is_published = false;
         $this->is_visible = true;
@@ -168,6 +173,7 @@ class BlogPosts extends Component
     {
         return view('livewire.admin.blog-posts', [
             'posts' => BlogPost::orderBy('sort_order')->get(),
+            'episodes' => Episode::where('visible', true)->orderBy('title')->get(),
         ])->layout('layouts.admin');
     }
 }

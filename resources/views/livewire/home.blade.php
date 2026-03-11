@@ -550,4 +550,46 @@
         </section>
     @endif
 
+    {{-- ============================================================
+         QUOTE BANNER
+         ============================================================ --}}
+    @if ($randomQuote)
+        @php
+            $qChar = $randomQuote->character;
+            $quoteCharJson = json_encode([
+                'name' => $qChar->full_name,
+                'nickname' => $qChar->nick_name,
+                'age' => $qChar->age,
+                'job' => $qChar->job?->title,
+                'bio' => $qChar->bio,
+                'image' => ($qChar->profile_photo_path ?? $qChar->profile_image_path) ? Storage::url($qChar->profile_photo_path ?? $qChar->profile_image_path) : null,
+                'imageHover' => ($qChar->profile_photo_path ? $qChar->profile_photo_hover_path : $qChar->profile_image_hover_path) ? Storage::url($qChar->profile_photo_path ? $qChar->profile_photo_hover_path : $qChar->profile_image_hover_path) : null,
+                'fullBody' => $qChar->full_body_image_path ? Storage::url($qChar->full_body_image_path) : null,
+                'fullBodyHover' => $qChar->full_body_image_hover_path ? Storage::url($qChar->full_body_image_hover_path) : null,
+                'background' => $qChar->background_image_path ? Storage::url($qChar->background_image_path) : null,
+                'links' => $qChar->socialLinks->map(fn($l) => ['title' => $l->title, 'url' => $l->url]),
+            ]);
+        @endphp
+        <section class="bg-accent py-8 md:py-10">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <blockquote class="relative">
+                    <p class="text-black text-2xl md:text-3xl lg:text-4xl leading-snug" style="font-family: 'Bebas Neue', cursive;">
+                        "{{ $randomQuote->text }}"
+                    </p>
+                    <footer class="mt-4 text-right">
+                        <cite class="not-italic" style="font-family: 'Montserrat', sans-serif;">
+                            <button
+                                type="button"
+                                class="text-black/70 text-sm md:text-base font-semibold uppercase tracking-wider hover:text-black transition cursor-pointer"
+                                @click="$dispatch('character-popup', {{ $quoteCharJson }})"
+                            >
+                                — {{ $qChar->full_name }}
+                            </button>
+                        </cite>
+                    </footer>
+                </blockquote>
+            </div>
+        </section>
+    @endif
+
 </div>

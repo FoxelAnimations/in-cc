@@ -25,6 +25,7 @@ class SiteSetting extends Model
         'show_minis',
         'show_specials',
         'show_collabs',
+        'show_quotes',
         'carousel_title',
     ];
 
@@ -40,6 +41,7 @@ class SiteSetting extends Model
             'show_minis' => 'boolean',
             'show_specials' => 'boolean',
             'show_collabs' => 'boolean',
+            'show_quotes' => 'boolean',
         ];
     }
 

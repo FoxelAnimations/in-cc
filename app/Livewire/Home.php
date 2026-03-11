@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\AgeGate;
 use App\Models\Collab;
+use App\Models\Quote;
 use App\Models\Episode;
 use App\Models\HeroContent;
 use App\Models\HeroVideo;
@@ -37,6 +38,7 @@ class Home extends Component
             'blocksBelow' => ContentBlock::active()->belowEpisodes()->get(),
             'collabLogos' => ($settings?->show_collabs ?? false) ? Collab::where('show_on_homepage', true)->where('is_published', true)->where('is_visible', true)->whereNotNull('logo_image')->orderBy('sort_order')->get() : collect(),
             'showCollabs' => $settings?->show_collabs ?? false,
+            'randomQuote' => ($settings?->show_quotes ?? true) ? Quote::with(['character.job', 'character.socialLinks'])->active()->inRandomOrder()->first() : null,
             'ageGate' => AgeGate::first(),
         ])->layoutData(['bgClass' => 'bg-black']);
     }

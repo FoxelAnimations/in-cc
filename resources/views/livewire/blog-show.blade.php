@@ -1,4 +1,5 @@
-<div class="bg-black min-h-screen -mt-16 pt-16 text-white">
+<div class="bg-black min-h-screen -mt-16 pt-16 text-white"
+     x-data="{ videoOpen: false }">
     <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
 
         {{-- Back link --}}
@@ -12,12 +13,39 @@
             {{ $post->title }}
         </h1>
 
-        {{-- Featured image --}}
-        @if ($post->featured_image)
-            <div class="mb-8 rounded-sm overflow-hidden border border-zinc-800">
-                <img src="{{ Storage::url($post->featured_image) }}"
-                     alt="{{ $post->title }}"
-                     class="w-full object-cover max-h-[500px]">
+        {{-- Image + Video side by side --}}
+        @if ($post->featured_image || $post->episode)
+            <div class="grid grid-cols-1 {{ $post->featured_image && $post->episode ? 'md:grid-cols-2' : '' }} gap-4 mb-8">
+                {{-- Featured image --}}
+                @if ($post->featured_image)
+                    <div class="rounded-sm overflow-hidden border border-zinc-800">
+                        <img src="{{ Storage::url($post->featured_image) }}"
+                             alt="{{ $post->title }}"
+                             class="w-full object-cover max-h-[400px]">
+                    </div>
+                @endif
+
+                {{-- Video thumbnail (click to open popup) --}}
+                @if ($post->episode)
+                    <div class="rounded-sm overflow-hidden border border-zinc-800 relative cursor-pointer group"
+                         @click="videoOpen = true">
+                        @if ($post->episode->thumbnailUrl())
+                            <img src="{{ $post->episode->thumbnailUrl() }}"
+                                 alt="{{ $post->episode->title }}"
+                                 class="w-full object-cover max-h-[400px] h-full transition group-hover:scale-105 duration-500">
+                        @else
+                            <div class="w-full h-full min-h-[200px] bg-zinc-900 flex items-center justify-center">
+                                <svg class="w-16 h-16 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                        @endif
+                        {{-- Play overlay --}}
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition">
+                            <div class="w-16 h-16 rounded-full bg-accent/90 flex items-center justify-center group-hover:scale-110 transition">
+                                <svg class="w-7 h-7 text-black ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         @endif
 
@@ -53,4 +81,41 @@
             </a>
         </div>
     </article>
+
+    {{-- Video Popup Modal --}}
+    @if ($post->episode)
+        <template x-teleport="body">
+            <div
+                x-show="videoOpen"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-50 flex items-start md:items-center justify-center bg-black/95 p-0 md:p-8 overflow-y-auto"
+                @click.self="videoOpen = false"
+                @keydown.escape.window="videoOpen = false"
+                style="display: none;"
+            >
+                <button @click="videoOpen = false" class="absolute top-2 right-2 md:top-4 md:right-4 z-10 text-white hover:text-accent transition">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <div class="w-full max-w-5xl md:max-h-full" @click.stop>
+                    <div class="aspect-video bg-black rounded-none md:rounded-sm overflow-hidden">
+                        @if ($post->episode->isYoutube() && $post->episode->youtubeEmbedUrl())
+                            <template x-if="videoOpen">
+                                <iframe src="{{ $post->episode->youtubeEmbedUrl() }}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                            </template>
+                        @elseif ($post->episode->videoUrl())
+                            <template x-if="videoOpen">
+                                <video controls autoplay class="w-full h-full" src="{{ $post->episode->videoUrl() }}"></video>
+                            </template>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </template>
+    @endif
 </div>

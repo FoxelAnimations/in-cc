@@ -22,6 +22,7 @@ use App\Livewire\Admin\ChatList;
 use App\Livewire\Admin\ChatView;
 use App\Livewire\Admin\BlogPosts as AdminBlogPosts;
 use App\Livewire\Admin\Collabs as AdminCollabs;
+use App\Livewire\Admin\Quotes as AdminQuotes;
 use App\Livewire\Admin\ContentBlocks;
 use App\Livewire\Admin\Cameras as AdminCameras;
 use App\Livewire\Admin\CameraPlanner;
@@ -70,6 +71,7 @@ Route::middleware([
         Route::get('/admin/content-blocks', ContentBlocks::class)->name('admin.content-blocks');
         Route::get('/admin/blog', AdminBlogPosts::class)->name('admin.blog');
         Route::get('/admin/collabs', AdminCollabs::class)->name('admin.collabs');
+        Route::get('/admin/quotes', AdminQuotes::class)->name('admin.quotes');
         Route::get('/admin/cameras', AdminCameras::class)->name('admin.cameras');
         Route::get('/admin/cameras/settings', CameraSettings::class)->name('admin.camera-settings');
         Route::get('/admin/cameras/{camera}/planner', CameraPlanner::class)->name('admin.camera-planner');

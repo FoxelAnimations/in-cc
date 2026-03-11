@@ -112,6 +112,18 @@
                         @error('content') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                     </div>
 
+                    {{-- Episode / Video (optional) --}}
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Video (optioneel)') }}</label>
+                        <select wire:model="episode_id" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm">
+                            <option value="">{{ __('Geen video') }}</option>
+                            @foreach($episodes as $episode)
+                                <option value="{{ $episode->id }}">{{ $episode->title }}</option>
+                            @endforeach
+                        </select>
+                        @error('episode_id') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
                     {{-- Button section --}}
                     <div class="rounded-sm bg-zinc-800/50 border border-zinc-700 p-4 space-y-4">
                         <h3 class="text-sm font-semibold text-zinc-400 uppercase tracking-wider">{{ __('Knop (optioneel)') }}</h3>

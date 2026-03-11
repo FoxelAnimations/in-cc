@@ -67,6 +67,7 @@
                         <a href="{{ route('admin.content-blocks') }}" class="{{ request()->routeIs('admin.content-blocks') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest transition hover:text-accent">CONTENT</a>
                         <a href="{{ route('admin.blog') }}" class="{{ request()->routeIs('admin.blog') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest transition hover:text-accent">BLOG</a>
                         <a href="{{ route('admin.collabs') }}" class="{{ request()->routeIs('admin.collabs') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest transition hover:text-accent">COLLABS</a>
+                        <a href="{{ route('admin.quotes') }}" class="{{ request()->routeIs('admin.quotes') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest transition hover:text-accent">QUOTES</a>
                         <a href="{{ route('admin.cameras') }}" class="{{ request()->routeIs('admin.cameras*') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest transition hover:text-accent">CAMERAS</a>
                         <a href="{{ route('admin.beacons') }}" class="{{ request()->routeIs('admin.beacon*') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest transition hover:text-accent">BEACONS</a>
                         <a href="{{ route('admin.chats') }}" class="{{ request()->routeIs('admin.chats*') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest transition hover:text-accent relative">
@@ -108,6 +109,7 @@
                     <a href="{{ route('admin.content-blocks') }}" class="block px-4 py-2 {{ request()->routeIs('admin.content-blocks') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest hover:text-accent transition">CONTENT</a>
                     <a href="{{ route('admin.blog') }}" class="block px-4 py-2 {{ request()->routeIs('admin.blog') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest hover:text-accent transition">BLOG</a>
                     <a href="{{ route('admin.collabs') }}" class="block px-4 py-2 {{ request()->routeIs('admin.collabs') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest hover:text-accent transition">COLLABS</a>
+                    <a href="{{ route('admin.quotes') }}" class="block px-4 py-2 {{ request()->routeIs('admin.quotes') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest hover:text-accent transition">QUOTES</a>
                     <a href="{{ route('admin.cameras') }}" class="block px-4 py-2 {{ request()->routeIs('admin.cameras*') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest hover:text-accent transition">CAMERAS</a>
                     <a href="{{ route('admin.beacons') }}" class="block px-4 py-2 {{ request()->routeIs('admin.beacon*') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest hover:text-accent transition">BEACONS</a>
                     <a href="{{ route('admin.chats') }}" class="block px-4 py-2 {{ request()->routeIs('admin.chats*') ? 'text-accent' : 'text-zinc-400' }} text-lg tracking-widest hover:text-accent transition">

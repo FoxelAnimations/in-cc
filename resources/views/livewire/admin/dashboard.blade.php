@@ -309,6 +309,12 @@
                     </label>
                     <p class="text-xs text-zinc-500 ml-8">{{ __('Shows the collab page link in the navigation and the logo slider on the homepage.') }}</p>
 
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" wire:model.live="showQuotes" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
+                        <span class="text-sm font-medium text-white">{{ __('Show Quotes') }}</span>
+                    </label>
+                    <p class="text-xs text-zinc-500 ml-8">{{ __('Shows a random character quote banner at the bottom of the homepage.') }}</p>
+
                     <button type="submit" class="inline-flex items-center bg-accent text-black px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90">
                         {{ __('Save Homepage Settings') }}
                     </button>
