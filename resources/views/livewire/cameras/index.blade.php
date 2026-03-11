@@ -327,6 +327,10 @@ Alpine.data('cameraFeed', () => ({
 
     // Weather system
     weatherEnabled: false,
+    rainMode: 'automatic',
+    manualRainIntensity: 50,
+    manualCloudCover: 50,
+    manualWindSpeed: 50,
     weatherData: { cloud_cover: 0, rain: 0, wind_speed: 0, temperature: null, weather_code: undefined },
     cloudOpacity: 0,
     cardClouds: [],
@@ -408,8 +412,8 @@ Alpine.data('cameraFeed', () => ({
             // Intensity: drops per frame based on rain mm/h
             // 0.1 mm = light drizzle, 2.5 = moderate, 7.5+ = heavy
             const intensity = Math.min(rain / 5, 1); // 0-1 normalized
-            const dropsPerFrame = Math.ceil(intensity * 8); // 1-8 new drops per frame
-            const maxDrops = Math.ceil(intensity * 200); // max active drops
+            const dropsPerFrame = Math.ceil(2 + intensity * 14); // 2-16 new drops per frame
+            const maxDrops = Math.ceil(40 + intensity * 360); // 40-400 max active drops
             const windAngle = 0.15; // slight wind angle
 
             document.querySelectorAll('.rain-canvas').forEach(canvas => {
@@ -431,10 +435,10 @@ Alpine.data('cameraFeed', () => ({
                     drops.push({
                         x: Math.random() * (w + 40) - 20,
                         y: -10 - Math.random() * 30,
-                        speed: 10 + Math.random() * 10 + intensity * 8,
-                        length: 12 + Math.random() * 16 + intensity * 10,
-                        opacity: 0.3 + Math.random() * 0.3 + intensity * 0.2,
-                        width: 1 + Math.random() * 1.2,
+                        speed: 12 + Math.random() * 12 + intensity * 10,
+                        length: 18 + Math.random() * 22 + intensity * 15,
+                        opacity: 0.5 + Math.random() * 0.3 + intensity * 0.2,
+                        width: 1.5 + Math.random() * 1.5,
                     });
                 }
 
@@ -447,7 +451,7 @@ Alpine.data('cameraFeed', () => ({
                     ctx.beginPath();
                     ctx.moveTo(d.x, d.y);
                     ctx.lineTo(d.x + windAngle * d.length, d.y + d.length);
-                    ctx.strokeStyle = `rgba(180, 210, 240, ${d.opacity})`;
+                    ctx.strokeStyle = `rgba(200, 220, 255, ${d.opacity})`;
                     ctx.lineWidth = d.width;
                     ctx.stroke();
 
@@ -458,11 +462,11 @@ Alpine.data('cameraFeed', () => ({
                     // Remove off-screen drops (draw splash)
                     if (d.y > h) {
                         // Splash effect
-                        if (intensity > 0.3) {
+                        if (intensity > 0.2) {
                             ctx.beginPath();
-                            ctx.arc(d.x, h - 1, 1 + Math.random() * 2, 0, Math.PI, true);
-                            ctx.strokeStyle = `rgba(180, 210, 240, ${d.opacity * 0.5})`;
-                            ctx.lineWidth = 0.5;
+                            ctx.arc(d.x, h - 1, 1.5 + Math.random() * 2.5, 0, Math.PI, true);
+                            ctx.strokeStyle = `rgba(200, 220, 255, ${d.opacity * 0.6})`;
+                            ctx.lineWidth = 0.8;
                             ctx.stroke();
                         }
                         drops.splice(i, 1);
@@ -492,6 +496,20 @@ Alpine.data('cameraFeed', () => ({
             this.cloudOpacity = 0;
             return;
         }
+
+        if (this.rainMode === 'manual') {
+            // Use manual values: intensity 0-100 mapped to rain mm/h (0-10), cloud cover %, wind km/h (0-50)
+            this.weatherData = {
+                cloud_cover: this.manualCloudCover,
+                rain: (this.manualRainIntensity / 100) * 10,
+                wind_speed: (this.manualWindSpeed / 100) * 50,
+                temperature: this.weatherData.temperature,
+                weather_code: this.manualRainIntensity > 60 ? 65 : (this.manualRainIntensity > 20 ? 61 : (this.manualRainIntensity > 0 ? 51 : 0)),
+            };
+            this.cloudOpacity = this.weatherData.cloud_cover / 100;
+            return;
+        }
+
         try {
             const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.8278&longitude=3.2644&current=cloud_cover,rain,showers,precipitation,temperature_2m,weather_code,wind_speed_10m');
             if (!res.ok) return;
@@ -536,9 +554,13 @@ Alpine.data('cameraFeed', () => ({
                 this.updateSkyColor();
             }
 
-            // Weather toggle from API
+            // Weather toggle and mode from API
             const wasEnabled = this.weatherEnabled;
             this.weatherEnabled = data.weather_enabled ?? false;
+            this.rainMode = data.rain_mode ?? 'automatic';
+            this.manualRainIntensity = data.manual_rain_intensity ?? 50;
+            this.manualCloudCover = data.manual_cloud_cover ?? 50;
+            this.manualWindSpeed = data.manual_wind_speed ?? 50;
 
             // Start or stop weather
             if (this.weatherEnabled && !this.weatherTimer) {
@@ -923,6 +945,7 @@ Alpine.data('cameraFeed', () => ({
         const cameraWindVol = (cam.wind_volume ?? 50) / 100;
 
         // Weather intensity: rain mm/h (0-10 mapped to 0-1), wind speed km/h (0-50 mapped to 0-1)
+        // In manual mode, weatherData already contains the mapped values from fetchWeather()
         const rainIntensity = this.weatherEnabled ? Math.min((this.weatherData.rain || 0) / 5, 1) : 0;
         const windIntensity = this.weatherEnabled ? Math.min((this.weatherData.wind_speed || 0) / 40, 1) : 0;
 

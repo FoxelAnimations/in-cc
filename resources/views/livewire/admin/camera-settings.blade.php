@@ -51,6 +51,78 @@
                 </div>
             </div>
 
+            {{-- Manual Weather Controls --}}
+            <div class="bg-zinc-900 border border-zinc-800 rounded-sm" x-data="{ mode: @entangle('rainMode') }">
+                <div class="px-5 py-4">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-accent mb-1">Weer besturing</h3>
+                    <p class="text-xs text-zinc-500 mb-4">Kies of regen, wolken en wind automatisch worden bepaald door het weer in Kortrijk, of handmatig met onderstaande schuifregelaars.</p>
+
+                    {{-- Auto / Manual toggle --}}
+                    <div class="flex items-center gap-4 mb-5">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" wire:model.live="rainMode" value="automatic" class="text-accent focus:ring-accent bg-zinc-800 border-zinc-600">
+                            <span class="text-sm text-zinc-300">Automatisch</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" wire:model.live="rainMode" value="manual" class="text-accent focus:ring-accent bg-zinc-800 border-zinc-600">
+                            <span class="text-sm text-zinc-300">Handmatig</span>
+                        </label>
+                    </div>
+
+                    {{-- Sliders --}}
+                    <div class="space-y-4" :class="{ 'opacity-40 pointer-events-none': mode === 'automatic' }">
+                        {{-- Rain intensity --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs text-zinc-500 uppercase tracking-wider">Regen intensiteit</label>
+                                <span class="text-xs text-zinc-400 font-mono" x-text="$wire.manualRainIntensity + '%'"></span>
+                            </div>
+                            <input type="range" wire:model.live="manualRainIntensity" min="0" max="100" step="1"
+                                class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                                :disabled="mode === 'automatic'">
+                            <div class="flex justify-between text-[10px] text-zinc-600 mt-0.5">
+                                <span>Geen</span>
+                                <span>Licht</span>
+                                <span>Matig</span>
+                                <span>Zwaar</span>
+                            </div>
+                        </div>
+
+                        {{-- Cloud cover --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs text-zinc-500 uppercase tracking-wider">Wolken dekking</label>
+                                <span class="text-xs text-zinc-400 font-mono" x-text="$wire.manualCloudCover + '%'"></span>
+                            </div>
+                            <input type="range" wire:model.live="manualCloudCover" min="0" max="100" step="1"
+                                class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-gray-400"
+                                :disabled="mode === 'automatic'">
+                            <div class="flex justify-between text-[10px] text-zinc-600 mt-0.5">
+                                <span>Helder</span>
+                                <span>Half bewolkt</span>
+                                <span>Volledig</span>
+                            </div>
+                        </div>
+
+                        {{-- Wind speed --}}
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs text-zinc-500 uppercase tracking-wider">Wind snelheid</label>
+                                <span class="text-xs text-zinc-400 font-mono" x-text="$wire.manualWindSpeed + '%'"></span>
+                            </div>
+                            <input type="range" wire:model.live="manualWindSpeed" min="0" max="100" step="1"
+                                class="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                                :disabled="mode === 'automatic'">
+                            <div class="flex justify-between text-[10px] text-zinc-600 mt-0.5">
+                                <span>Windstil</span>
+                                <span>Lichte bries</span>
+                                <span>Storm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-zinc-900 border border-zinc-800 rounded-sm">
                 <div class="px-5 py-3 border-b border-zinc-800">
                     <h3 class="text-sm font-semibold uppercase tracking-wider text-accent">Dagdelen</h3>

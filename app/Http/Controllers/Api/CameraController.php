@@ -141,6 +141,10 @@ class CameraController extends Controller
             'server_time' => $now->toIso8601String(),
             'slots' => CameraSlotSetting::getSlots(),
             'weather_enabled' => (bool) ($siteSettings?->weather_enabled ?? true),
+            'rain_mode' => $siteSettings?->rain_mode ?? 'automatic',
+            'manual_rain_intensity' => (int) ($siteSettings?->manual_rain_intensity ?? 50),
+            'manual_cloud_cover' => (int) ($siteSettings?->manual_cloud_cover ?? 50),
+            'manual_wind_speed' => (int) ($siteSettings?->manual_wind_speed ?? 50),
         ]);
     }
 

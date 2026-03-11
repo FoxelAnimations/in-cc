@@ -10,12 +10,20 @@ class CameraSettings extends Component
 {
     public array $slots = [];
     public bool $weatherEnabled = true;
+    public string $rainMode = 'automatic';
+    public int $manualRainIntensity = 50;
+    public int $manualCloudCover = 50;
+    public int $manualWindSpeed = 50;
 
     public function mount(): void
     {
         $this->loadSlots();
         $siteSettings = SiteSetting::first();
         $this->weatherEnabled = $siteSettings?->weather_enabled ?? true;
+        $this->rainMode = $siteSettings?->rain_mode ?? 'automatic';
+        $this->manualRainIntensity = $siteSettings?->manual_rain_intensity ?? 50;
+        $this->manualCloudCover = $siteSettings?->manual_cloud_cover ?? 50;
+        $this->manualWindSpeed = $siteSettings?->manual_wind_speed ?? 50;
     }
 
     protected function loadSlots(): void
@@ -126,6 +134,10 @@ class CameraSettings extends Component
         if ($siteSettings) {
             $siteSettings->update([
                 'weather_enabled' => $this->weatherEnabled,
+                'rain_mode' => $this->rainMode,
+                'manual_rain_intensity' => $this->manualRainIntensity,
+                'manual_cloud_cover' => $this->manualCloudCover,
+                'manual_wind_speed' => $this->manualWindSpeed,
             ]);
         }
 
