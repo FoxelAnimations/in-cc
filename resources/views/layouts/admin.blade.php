@@ -135,6 +135,29 @@
 
         @stack('modals')
 
+        {{-- Global chat notification ping (audible from any CMS page) --}}
+        <div x-data="{
+            playPing() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    ctx.resume().then(() => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(520, ctx.currentTime);
+                        osc.frequency.setValueAtTime(440, ctx.currentTime + 0.15);
+                        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                        osc.start(ctx.currentTime);
+                        osc.stop(ctx.currentTime + 0.5);
+                    });
+                } catch (e) {}
+            }
+        }" @chat-ping.window="playPing()"></div>
+        <livewire:admin.chat-notifier />
+
         @livewireScripts
     </body>
 </html>

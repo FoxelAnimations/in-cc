@@ -116,5 +116,6 @@ return [
     ],
 
     'notification_address' => env('MAIL_NOTIFICATION_ADDRESS'),
+    'notification_fallback_address' => env('MAIL_NOTIFICATION_FALLBACK_ADDRESS'),
 
 ];

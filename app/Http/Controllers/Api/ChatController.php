@@ -153,8 +153,8 @@ class ChatController extends Controller
             'unread_count' => $conversation->unread_count + 1,
         ]);
 
-        // Notify via email if no admin has been active recently
-        $this->sendOfflineNotification($validated['message'], $character, $visitorIp);
+        // Notify: email if first message in session and no admin online
+        $this->sendOfflineNotification($conversation, $validated['message'], $character, $visitorIp);
 
         // AI mode: auto-respond via OpenAI
         if ($character->isAiChat()) {
@@ -320,20 +320,14 @@ class ChatController extends Controller
         }
     }
 
-    protected function sendOfflineNotification(string $message, Character $character, string $visitorIp): void
+    protected function sendOfflineNotification(ChatConversation $conversation, string $message, Character $character, string $visitorIp): void
     {
-        $notificationEmail = config('mail.notification_address');
-        if (!$notificationEmail) {
+        // Only send email for the first message in a chat session
+        if (!$conversation->wasRecentlyCreated) {
             return;
         }
 
-        // Rate limit: max 1 notification email per 10 minutes
-        $cacheKey = 'chat_offline_email_sent';
-        if (Cache::has($cacheKey)) {
-            return;
-        }
-
-        // Check if any admin has been active in the last 5 minutes
+        // If any admin is logged in and active in the CMS, skip email (they'll get a ping instead)
         $recentlyActiveAdmin = User::where('is_admin', true)
             ->where('last_active_at', '>=', now()->subMinutes(5))
             ->exists();
@@ -342,14 +336,34 @@ class ChatController extends Controller
             return;
         }
 
-        Cache::put($cacheKey, true, 600); // 10 minutes
+        $primaryEmail = config('mail.notification_address');
+        $fallbackEmail = config('mail.notification_fallback_address');
 
-        try {
-            Mail::to($notificationEmail)->send(
-                new ChatOfflineNotification($message, $character, $visitorIp)
-            );
-        } catch (\Exception $e) {
-            report($e);
+        if (!$primaryEmail && !$fallbackEmail) {
+            return;
+        }
+
+        $mailable = new ChatOfflineNotification($message, $character, $visitorIp);
+
+        // Try primary address first
+        if ($primaryEmail) {
+            try {
+                Mail::to($primaryEmail)->send(clone $mailable);
+                return; // Success — no need for fallback
+            } catch (\Exception $e) {
+                report($e);
+            }
+        }
+
+        // Fallback: send from Resend's shared domain to the fallback address
+        if ($fallbackEmail) {
+            try {
+                $fallbackMailable = clone $mailable;
+                $fallbackMailable->from('onboarding@resend.dev', config('app.name', 'IN-CC'));
+                Mail::to($fallbackEmail)->send($fallbackMailable);
+            } catch (\Exception $e) {
+                report($e);
+            }
         }
     }
 }
