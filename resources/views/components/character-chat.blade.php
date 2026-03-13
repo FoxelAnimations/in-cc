@@ -531,52 +531,45 @@
                         <div class="px-3 pt-2 text-xs text-yellow-400" x-text="errorMsg"></div>
                     </template>
                     <div class="p-3">
-                        <template x-if="blocked">
-                            <form @submit.prevent="if (blockedInput.trim()) { sendBlockedAttempt(); }" class="flex items-center gap-2">
-                                <input
-                                    x-model="blockedInput"
-                                    type="text"
-                                    maxlength="1000"
-                                    placeholder="Typ een bericht..."
-                                    class="flex-1 bg-zinc-800 border border-zinc-700 text-white text-sm rounded-sm px-3 py-2 focus:border-accent focus:ring-accent placeholder-zinc-500"
-                                    @keydown.enter.prevent="if (blockedInput.trim()) { sendBlockedAttempt(); }"
-                                >
-                                <button
-                                    type="submit"
-                                    :disabled="!blockedInput.trim()"
-                                    class="bg-accent text-black p-2 rounded-sm transition hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                                >
-                                    <svg class="w-4 h-4 rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                </button>
-                            </form>
-                        </template>
-                        <template x-if="!blocked && !chatOnline">
-                            <div class="flex items-center justify-center gap-2 py-2 text-sm text-zinc-500">
-                                <div class="w-2 h-2 rounded-full bg-zinc-600"></div>
-                                <span x-text="(activeCharacter?.first_name || activeCharacter?.name || '') + ' is momenteel niet online'"></span>
-                            </div>
-                        </template>
-                        <template x-if="!blocked && chatOnline">
-                            <form @submit.prevent="sendMessage()" class="flex items-center gap-2">
-                                <input
-                                    x-ref="chatInput"
-                                    x-model="input"
-                                    type="text"
-                                    maxlength="1000"
-                                    :disabled="sending || cooldown"
-                                    placeholder="Typ een bericht..."
-                                    class="flex-1 bg-zinc-800 border border-zinc-700 text-white text-sm rounded-sm px-3 py-2 focus:border-accent focus:ring-accent placeholder-zinc-500"
-                                    @keydown.enter.prevent="sendMessage()"
-                                >
-                                <button
-                                    type="submit"
-                                    :disabled="sending || cooldown || !input.trim()"
-                                    class="bg-accent text-black p-2 rounded-sm transition hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                                >
-                                    <svg class="w-4 h-4 rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                                </button>
-                            </form>
-                        </template>
+                        <form x-show="blocked" @submit.prevent="if (blockedInput.trim()) { sendBlockedAttempt(); }" class="flex items-center gap-2">
+                            <input
+                                x-model="blockedInput"
+                                type="text"
+                                maxlength="1000"
+                                placeholder="Typ een bericht..."
+                                class="flex-1 bg-zinc-800 border border-zinc-700 text-white text-sm rounded-sm px-3 py-2 focus:border-accent focus:ring-accent placeholder-zinc-500"
+                                @keydown.enter.prevent="if (blockedInput.trim()) { sendBlockedAttempt(); }"
+                            >
+                            <button
+                                type="submit"
+                                :disabled="!blockedInput.trim()"
+                                class="bg-accent text-black p-2 rounded-sm transition hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                            >
+                                <svg class="w-4 h-4 rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            </button>
+                        </form>
+                        <div x-show="!blocked && !chatOnline" class="flex items-center justify-center gap-2 py-2 text-sm text-zinc-500">
+                            <div class="w-2 h-2 rounded-full bg-zinc-600"></div>
+                            <span x-text="(activeCharacter?.first_name || activeCharacter?.name || '') + ' is momenteel niet online'"></span>
+                        </div>
+                        <form x-show="!blocked && chatOnline" @submit.prevent="sendMessage()" class="flex items-center gap-2">
+                            <input
+                                x-ref="chatInput"
+                                x-model="input"
+                                type="text"
+                                maxlength="1000"
+                                placeholder="Typ een bericht..."
+                                class="flex-1 bg-zinc-800 border border-zinc-700 text-white text-sm rounded-sm px-3 py-2 focus:border-accent focus:ring-accent placeholder-zinc-500"
+                                @keydown.enter.prevent="sendMessage()"
+                            >
+                            <button
+                                type="submit"
+                                :disabled="sending || cooldown || !input.trim()"
+                                class="bg-accent text-black p-2 rounded-sm transition hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                            >
+                                <svg class="w-4 h-4 rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
