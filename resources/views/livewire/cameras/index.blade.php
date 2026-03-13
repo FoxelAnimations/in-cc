@@ -435,7 +435,7 @@ Alpine.data('cameraFeed', () => ({
                     drops.push({
                         x: Math.random() * (w + 40) - 20,
                         y: -10 - Math.random() * 30,
-                        speed: 12 + Math.random() * 12 + intensity * 10,
+                        speed: 18 + Math.random() * 18 + intensity * 15,
                         length: 18 + Math.random() * 22 + intensity * 15,
                         opacity: 0.5 + Math.random() * 0.3 + intensity * 0.2,
                         width: 1.5 + Math.random() * 1.5,
