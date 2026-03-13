@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 
 class CameraVideo extends Model
@@ -21,6 +22,11 @@ class CameraVideo extends Model
     public function camera(): BelongsTo
     {
         return $this->belongsTo(Camera::class);
+    }
+
+    public function characters(): BelongsToMany
+    {
+        return $this->belongsToMany(Character::class, 'camera_video_character');
     }
 
     public function videoUrl(): ?string

@@ -7,6 +7,7 @@ use App\Models\CameraDefaultBlock;
 use App\Models\CameraDefaultSound;
 use App\Models\CameraScheduledVideo;
 use App\Models\CameraVideo;
+use App\Models\Character;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -21,6 +22,8 @@ class CameraPlanner extends Component
     public $videoUpload = null;
     public $newAudioUpload = null;
     public string $newVideoType = 'loop';
+    public string $newVideoName = '';
+    public array $newVideoCharacters = [];
     public ?int $newVideoDurationSeconds = null;
 
     // Audio uploads map (videoId => file) — for editing existing videos
@@ -41,6 +44,7 @@ class CameraPlanner extends Component
     public ?int $editingVideoId = null;
     public string $editVideoName = '';
     public string $editVideoType = 'loop';
+    public array $editVideoCharacters = [];
 
     // Schedule modal
     public bool $showScheduleModal = false;
@@ -106,14 +110,14 @@ class CameraPlanner extends Component
 
     public function openAddVideoModal(): void
     {
-        $this->reset('videoUpload', 'newAudioUpload', 'newVideoDurationSeconds');
+        $this->reset('videoUpload', 'newAudioUpload', 'newVideoDurationSeconds', 'newVideoName', 'newVideoCharacters');
         $this->newVideoType = 'loop';
         $this->showAddVideoModal = true;
     }
 
     public function closeAddVideoModal(): void
     {
-        $this->reset('videoUpload', 'newAudioUpload', 'newVideoDurationSeconds');
+        $this->reset('videoUpload', 'newAudioUpload', 'newVideoDurationSeconds', 'newVideoName', 'newVideoCharacters');
         $this->newVideoType = 'loop';
         $this->showAddVideoModal = false;
     }
@@ -124,7 +128,8 @@ class CameraPlanner extends Component
             return;
         }
 
-        $filename = $this->videoUpload->getClientOriginalName();
+        $originalName = $this->videoUpload->getClientOriginalName();
+        $filename = trim($this->newVideoName) ?: $originalName;
         $videoPath = $this->videoUpload->store("cameras/{$this->camera->id}/videos", 'public');
 
         $audioPath = null;
@@ -132,7 +137,7 @@ class CameraPlanner extends Component
             $audioPath = $this->newAudioUpload->store("cameras/{$this->camera->id}/audio", 'public');
         }
 
-        CameraVideo::create([
+        $video = CameraVideo::create([
             'camera_id' => $this->camera->id,
             'filename' => $filename,
             'video_path' => $videoPath,
@@ -141,6 +146,10 @@ class CameraPlanner extends Component
             'duration_seconds' => $this->newVideoType === 'realtime' ? $this->newVideoDurationSeconds : null,
             'sort_order' => (CameraVideo::where('camera_id', $this->camera->id)->max('sort_order') ?? -1) + 1,
         ]);
+
+        if (!empty($this->newVideoCharacters)) {
+            $video->characters()->sync($this->newVideoCharacters);
+        }
 
         $this->closeAddVideoModal();
         session()->flash('status', 'Video geüpload.');
@@ -154,6 +163,7 @@ class CameraPlanner extends Component
         $this->editingVideoId = $id;
         $this->editVideoName = $video->filename;
         $this->editVideoType = $video->behaviour_type ?? 'loop';
+        $this->editVideoCharacters = $video->characters()->pluck('characters.id')->map(fn ($id) => (string) $id)->toArray();
         $this->showEditVideoModal = true;
     }
 
@@ -167,6 +177,8 @@ class CameraPlanner extends Component
             'duration_seconds' => $this->editVideoType === 'loop' ? null : $video->duration_seconds,
         ]);
 
+        $video->characters()->sync($this->editVideoCharacters);
+
         $this->closeEditVideoModal();
         $this->dispatchScheduleUpdate();
         session()->flash('status', 'Video bijgewerkt.');
@@ -177,6 +189,7 @@ class CameraPlanner extends Component
         $this->editingVideoId = null;
         $this->editVideoName = '';
         $this->editVideoType = 'loop';
+        $this->editVideoCharacters = [];
         $this->showEditVideoModal = false;
     }
 
@@ -397,6 +410,12 @@ class CameraPlanner extends Component
             return;
         }
 
+        $characterConflict = $this->hasCharacterConflict($this->scheduleVideoId, $this->scheduleDayOfWeek, $this->scheduleStartTime, $this->scheduleEndTime, $this->editingScheduleId);
+        if ($characterConflict) {
+            session()->flash('status', "Conflict: {$characterConflict}");
+            return;
+        }
+
         $data = [
             'camera_id' => $this->camera->id,
             'camera_video_id' => $this->scheduleVideoId,
@@ -436,6 +455,13 @@ class CameraPlanner extends Component
             return;
         }
 
+        $characterConflict = $this->hasCharacterConflict($scheduled->camera_video_id, $dayOfWeek, $startTime, $endTime, $id);
+        if ($characterConflict) {
+            session()->flash('status', "Conflict: {$characterConflict}");
+            $this->dispatchScheduleUpdate();
+            return;
+        }
+
         $scheduled->update([
             'day_of_week' => $dayOfWeek,
             'start_time' => $startTime,
@@ -469,6 +495,13 @@ class CameraPlanner extends Component
             return;
         }
 
+        $characterConflict = $this->hasCharacterConflict($videoId, $dayOfWeek, $startTime, $endTime);
+        if ($characterConflict) {
+            session()->flash('status', "Conflict: {$characterConflict}");
+            $this->dispatchScheduleUpdate();
+            return;
+        }
+
         CameraScheduledVideo::create([
             'camera_id' => $this->camera->id,
             'camera_video_id' => $videoId,
@@ -488,6 +521,37 @@ class CameraPlanner extends Component
             ->where('end_time', '>', $startTime)
             ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
             ->exists();
+    }
+
+    protected function hasCharacterConflict(int $videoId, int $dayOfWeek, string $startTime, string $endTime, ?int $excludeId = null): ?string
+    {
+        $video = CameraVideo::with('characters')->find($videoId);
+        if (!$video || $video->characters->isEmpty()) {
+            return null;
+        }
+
+        $characterIds = $video->characters->pluck('id')->toArray();
+
+        // Find all scheduled videos on other cameras at the same day/time that share characters
+        $conflicting = CameraScheduledVideo::where('camera_id', '!=', $this->camera->id)
+            ->where('day_of_week', $dayOfWeek)
+            ->where('start_time', '<', $endTime)
+            ->where('end_time', '>', $startTime)
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
+            ->with(['video.characters', 'camera'])
+            ->get();
+
+        foreach ($conflicting as $scheduled) {
+            if (!$scheduled->video) continue;
+            $overlap = $scheduled->video->characters->whereIn('id', $characterIds);
+            if ($overlap->isNotEmpty()) {
+                $names = $overlap->map(fn ($c) => $c->full_name)->implode(', ');
+                $cameraName = $scheduled->camera?->name ?? 'andere camera';
+                return "{$names} is al ingepland op {$cameraName} ({$scheduled->start_time}–{$scheduled->end_time})";
+            }
+        }
+
+        return null;
     }
 
     public function closeScheduleModal(): void
@@ -533,7 +597,7 @@ class CameraPlanner extends Component
 
     public function render()
     {
-        $videos = $this->camera->videos()->orderBy('sort_order')->get();
+        $videos = $this->camera->videos()->with('characters')->orderBy('sort_order')->get();
         $defaults = $this->camera->defaultBlocks()->with('video')->get();
         $scheduled = $this->camera->scheduledVideos()->with('video')->get();
         $defaultSounds = $this->camera->defaultSounds()->get()->keyBy('time_slot');
@@ -574,6 +638,8 @@ class CameraPlanner extends Component
             'days' => CameraDefaultBlock::DAY_LABELS,
         ];
 
+        $characters = Character::orderBy('sort_order')->get(['id', 'first_name', 'last_name']);
+
         return view('livewire.admin.camera-planner', [
             'videos' => $videos,
             'defaults' => $defaults,
@@ -581,6 +647,7 @@ class CameraPlanner extends Component
             'scheduleData' => $scheduleData,
             'videosMeta' => $videosMeta,
             'defaultSounds' => $defaultSounds,
+            'characters' => $characters,
         ])->layout('layouts.admin');
     }
 }

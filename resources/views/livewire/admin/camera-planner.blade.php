@@ -328,6 +328,14 @@
                                         </span>
                                     </div>
                                 @endif
+                                {{-- Linked characters --}}
+                                @if ($video->characters->isNotEmpty())
+                                    <div class="px-2 pb-1.5 flex flex-wrap gap-1">
+                                        @foreach ($video->characters as $char)
+                                            <span class="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-sm bg-purple-900/40 text-purple-300 border border-purple-800/40">{{ $char->first_name }}</span>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </div>
                         @empty
                             <p class="text-xs text-zinc-600 text-center py-4">Nog geen video's</p>
@@ -553,6 +561,13 @@
                         x-on:livewire-upload-finish="progress = 0"
                     >
 
+                        {{-- Name --}}
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-zinc-400 mb-1">Naam (optioneel)</label>
+                            <input type="text" wire:model="newVideoName" placeholder="Wordt bestandsnaam als leeg"
+                                class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm rounded-sm focus:border-accent focus:outline-none">
+                        </div>
+
                         {{-- Video file --}}
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-zinc-400 mb-1">Videobestand *</label>
@@ -625,6 +640,21 @@
                             <div wire:loading wire:target="newAudioUpload" class="text-xs text-zinc-500 mt-1">Bestand laden...</div>
                             @error('newAudioUpload') <span class="text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                             <p class="text-[10px] text-zinc-600 mt-1">MP3, WAV, OGG, AAC of M4A</p>
+                        </div>
+
+                        {{-- Characters --}}
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-zinc-400 mb-2">Karakters (optioneel)</label>
+                            <div class="max-h-40 overflow-y-auto space-y-1 border border-zinc-700 rounded-sm p-2 bg-zinc-800">
+                                @foreach ($characters as $character)
+                                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-sm hover:bg-zinc-700/50 cursor-pointer transition">
+                                        <input type="checkbox" wire:model="newVideoCharacters" value="{{ $character->id }}"
+                                            class="accent-accent rounded-sm">
+                                        <span class="text-sm text-white">{{ $character->full_name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="text-[10px] text-zinc-600 mt-1">Gekoppelde karakters worden gecontroleerd op planningsconflicten.</p>
                         </div>
 
                         <div class="flex gap-3 justify-end">
@@ -727,6 +757,21 @@
                                     </button>
                                 @endif
                             @endif
+                        </div>
+
+                        {{-- Characters --}}
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-zinc-400 mb-2">Karakters</label>
+                            <div class="max-h-40 overflow-y-auto space-y-1 border border-zinc-700 rounded-sm p-2 bg-zinc-800">
+                                @foreach ($characters as $character)
+                                    <label class="flex items-center gap-2 px-2 py-1.5 rounded-sm hover:bg-zinc-700/50 cursor-pointer transition">
+                                        <input type="checkbox" wire:model="editVideoCharacters" value="{{ $character->id }}"
+                                            class="accent-accent rounded-sm">
+                                        <span class="text-sm text-white">{{ $character->full_name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="text-[10px] text-zinc-600 mt-1">Gekoppelde karakters worden gecontroleerd op planningsconflicten.</p>
                         </div>
 
                         <div class="flex gap-3 justify-between">
