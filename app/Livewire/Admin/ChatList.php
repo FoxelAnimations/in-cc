@@ -164,6 +164,18 @@ class ChatList extends Component
                     || in_array($conv->visitor_uuid, $blockedUuids);
             });
 
+        // Detect IPs with multiple UUIDs (possible incognito/alt abuse)
+        $ipUuidCounts = $conversations->filter(fn ($c) => $c->visitor_ip)
+            ->groupBy('visitor_ip')
+            ->map(fn ($group) => $group->pluck('visitor_uuid')->unique()->count())
+            ->filter(fn ($count) => $count > 1);
+
+        $conversations->each(function ($conv) use ($ipUuidCounts) {
+            $conv->shared_ip_count = ($conv->visitor_ip && $ipUuidCounts->has($conv->visitor_ip))
+                ? $ipUuidCounts[$conv->visitor_ip]
+                : 0;
+        });
+
         $totalUnread = (int) $conversations->where('is_blocked', false)->sum('unread_count');
 
         if ($totalUnread > $this->lastKnownUnread && $this->lastKnownUnread > -1) {

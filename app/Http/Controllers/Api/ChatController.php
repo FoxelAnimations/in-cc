@@ -21,6 +21,9 @@ class ChatController extends Controller
     /** Max visitor messages per day (across all conversations). */
     private const VISITOR_DAILY_LIMIT = 100;
 
+    /** Max open conversations per IP per character (prevents incognito spam). */
+    private const MAX_CONVERSATIONS_PER_IP = 2;
+
     /** Max AI responses generated globally per day. */
     private const GLOBAL_AI_DAILY_LIMIT = 1000;
 
@@ -87,14 +90,16 @@ class ChatController extends Controller
             return response()->json(['error' => 'Je bent geblokkeerd voor de chat.'], 403);
         }
 
-        // Cooldown: 1 second between messages per visitor
-        $cooldownKey = 'chat_cooldown:' . $validated['visitor_uuid'];
-        if (Cache::has($cooldownKey)) {
+        // Cooldown: 1 second between messages per visitor (checked by UUID and IP)
+        $cooldownKeyUuid = 'chat_cooldown:' . $validated['visitor_uuid'];
+        $cooldownKeyIp = 'chat_cooldown_ip:' . $visitorIp;
+        if (Cache::has($cooldownKeyUuid) || Cache::has($cooldownKeyIp)) {
             return response()->json([
                 'error' => 'Wacht even voordat je een nieuw bericht stuurt.',
             ], 429);
         }
-        Cache::put($cooldownKey, true, 1);
+        Cache::put($cooldownKeyUuid, true, 1);
+        Cache::put($cooldownKeyIp, true, 1);
 
         // Duplicate message prevention (same visitor + same text within 30s)
         $dupeKey = 'chat_dupe:' . $validated['visitor_uuid'] . ':' . md5($validated['message']);
@@ -111,16 +116,39 @@ class ChatController extends Controller
             return response()->json(['error' => 'Dit personage is niet beschikbaar voor chat.'], 403);
         }
 
-        // Per-visitor daily message limit
+        // Per-visitor daily message limit (checked across all UUIDs from same IP)
         $todayCount = ChatMessage::where('sender', 'visitor')
             ->where('created_at', '>=', now()->startOfDay())
-            ->whereHas('conversation', fn ($q) => $q->where('visitor_uuid', $validated['visitor_uuid']))
+            ->whereHas('conversation', fn ($q) => $q->where('visitor_uuid', $validated['visitor_uuid'])
+                ->orWhere('visitor_ip', $visitorIp))
             ->count();
 
         if ($todayCount >= self::VISITOR_DAILY_LIMIT) {
             return response()->json([
                 'error' => 'Je hebt het maximale aantal berichten voor vandaag bereikt. Probeer het morgen opnieuw.',
             ], 429);
+        }
+
+        // Limit open conversations per IP per character (prevents incognito tab spam)
+        $existingConversation = ChatConversation::where('visitor_ip', $visitorIp)
+            ->where('character_id', $character->id)
+            ->where('status', 'open')
+            ->where('visitor_uuid', '!=', $validated['visitor_uuid'])
+            ->first();
+
+        if ($existingConversation) {
+            // Count how many different UUIDs have open conversations from this IP for this character
+            $openConvCount = ChatConversation::where('visitor_ip', $visitorIp)
+                ->where('character_id', $character->id)
+                ->where('status', 'open')
+                ->distinct('visitor_uuid')
+                ->count('visitor_uuid');
+
+            if ($openConvCount >= self::MAX_CONVERSATIONS_PER_IP) {
+                return response()->json([
+                    'error' => 'Er zijn al te veel gesprekken actief vanaf dit apparaat.',
+                ], 429);
+            }
         }
 
         // Find or create conversation

@@ -187,6 +187,14 @@
                                         <x-user-agent-icons :parsed="$conversation->parsed_user_agent" :raw="$conversation->user_agent" />
                                     </div>
                                 @endif
+                                @if ($conversation->shared_ip_count > 0)
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-orange-400 border border-orange-900 px-1.5 py-0.5" title="Dit IP-adres ({{ $conversation->visitor_ip }}) heeft {{ $conversation->shared_ip_count }} verschillende sessies">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                                            {{ $conversation->shared_ip_count }} sessies zelfde IP
+                                        </span>
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <span class="text-sm text-zinc-400">{{ $conversation->messages_count }}</span>
