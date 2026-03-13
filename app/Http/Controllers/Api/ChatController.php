@@ -156,10 +156,10 @@ class ChatController extends Controller
         // Notify: email if first message in session and no admin online
         $this->sendOfflineNotification($conversation, $validated['message'], $character, $visitorIp);
 
-        // AI mode: auto-respond via OpenAI
-        if ($character->isAiChat()) {
-            return $this->handleAiResponse($conversation, $character);
-        }
+        // AI mode is temporarily disabled — all chats use manual mode
+        // if ($character->isAiChat()) {
+        //     return $this->handleAiResponse($conversation, $character);
+        // }
 
         // Manual mode: message stored, admin will respond later
         return response()->json([

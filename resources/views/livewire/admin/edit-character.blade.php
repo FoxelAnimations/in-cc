@@ -322,7 +322,7 @@
                     <div>
                         <label class="block text-sm font-medium text-zinc-400">{{ __('Chat Mode') }}</label>
                         <select wire:model="chat_mode" class="mt-1 block w-full rounded-sm border-zinc-700 bg-zinc-800 text-white shadow-sm focus:border-accent focus:ring-accent">
-                            <option value="ai">{{ __('AI (GPT auto-responds)') }}</option>
+                            <option value="ai" disabled>{{ __('AI (GPT auto-responds) — temporarily disabled') }}</option>
                             <option value="manual">{{ __('Manual (admin responds live)') }}</option>
                         </select>
                         <p class="mt-1 text-xs text-zinc-600">{{ __('In manual mode, visitor messages wait for an admin to reply as this character.') }}</p>
