@@ -773,8 +773,20 @@ Alpine.data('cameraFeed', () => ({
     scaleCloudAlpha(rgbaStr, scale) {
         const m = rgbaStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
         if (!m) return rgbaStr;
+        let r = parseInt(m[1]), g = parseInt(m[2]), b = parseInt(m[3]);
         const a = parseFloat(m[4] ?? 1) * scale;
-        return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${a.toFixed(3)})`;
+
+        // Darken clouds based on rain intensity: 10% at light rain, up to 60% at heavy rain
+        const rain = this.weatherData.rain || 0;
+        if (rain > 0) {
+            const rainFactor = Math.min(rain / 10, 1); // 0-1 normalized (10 mm/h = max)
+            const darken = 0.10 + rainFactor * 0.50; // 10%-60% darker
+            r = Math.round(r * (1 - darken));
+            g = Math.round(g * (1 - darken));
+            b = Math.round(b * (1 - darken));
+        }
+
+        return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
     },
 
     getCameraStatus(id) {
