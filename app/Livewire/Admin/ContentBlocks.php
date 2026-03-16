@@ -24,6 +24,9 @@ class ContentBlocks extends Component
     public string $button_label = '';
     public string $button_url = '';
     public bool $button_new_tab = false;
+    public string $button2_label = '';
+    public string $button2_url = '';
+    public bool $button2_new_tab = false;
     public bool $is_active = true;
     public string $placement = 'below_episodes';
 
@@ -43,6 +46,9 @@ class ContentBlocks extends Component
             'button_label' => ['nullable', 'string', 'max:255'],
             'button_url' => ['nullable', 'url', 'max:500'],
             'button_new_tab' => ['boolean'],
+            'button2_label' => ['nullable', 'string', 'max:255'],
+            'button2_url' => ['nullable', 'url', 'max:500'],
+            'button2_new_tab' => ['boolean'],
             'is_active' => ['boolean'],
             'placement' => ['required', 'string', 'in:above_episodes,below_episodes'],
         ];
@@ -66,6 +72,9 @@ class ContentBlocks extends Component
         $this->button_label = $block->button_label ?? '';
         $this->button_url = $block->button_url ?? '';
         $this->button_new_tab = $block->button_new_tab;
+        $this->button2_label = $block->button2_label ?? '';
+        $this->button2_url = $block->button2_url ?? '';
+        $this->button2_new_tab = $block->button2_new_tab;
         $this->is_active = $block->is_active;
         $this->placement = $block->placement ?? 'below_episodes';
         $this->existing_image_path = $block->image_path;
@@ -93,6 +102,9 @@ class ContentBlocks extends Component
             'button_label' => $this->button_label ?: null,
             'button_url' => $this->button_url ?: null,
             'button_new_tab' => $this->button_new_tab,
+            'button2_label' => $this->button2_label ?: null,
+            'button2_url' => $this->button2_url ?: null,
+            'button2_new_tab' => $this->button2_new_tab,
             'is_active' => $this->is_active,
             'placement' => $this->placement,
         ];
@@ -185,7 +197,8 @@ class ContentBlocks extends Component
         $this->reset([
             'editingId', 'pre_title', 'title', 'text', 'media_type',
             'image_upload', 'video_upload', 'youtube_url',
-            'button_label', 'button_url', 'button_new_tab', 'placement',
+            'button_label', 'button_url', 'button_new_tab',
+            'button2_label', 'button2_url', 'button2_new_tab', 'placement',
             'existing_image_path', 'existing_video_path',
         ]);
         $this->is_active = true;

@@ -149,26 +149,57 @@
                         @endif
                     </div>
 
-                    {{-- Button section --}}
+                    {{-- Buttons section --}}
                     <div class="rounded-sm bg-zinc-800/50 border border-zinc-700 p-4 space-y-4">
-                        <h3 class="text-sm font-semibold text-zinc-400 uppercase tracking-wider">{{ __('Knop (optioneel)') }}</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Knop label') }}</label>
-                                <input type="text" wire:model="button_label" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="Lees meer">
-                                @error('button_label') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                        <h3 class="text-sm font-semibold text-zinc-400 uppercase tracking-wider">{{ __('Knoppen (optioneel)') }}</h3>
+
+                        {{-- Button 1 --}}
+                        <div>
+                            <p class="text-xs font-medium text-zinc-400 mb-2">{{ __('Knop 1') }}</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Label') }}</label>
+                                    <input type="text" wire:model="button_label" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="Lees meer">
+                                    @error('button_label') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('URL') }}</label>
+                                    <input type="url" wire:model="button_url" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="https://...">
+                                    @error('button_url') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Knop URL') }}</label>
-                                <input type="url" wire:model="button_url" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="https://...">
-                                @error('button_url') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                            <div class="mt-2">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" wire:model="button_new_tab" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
+                                    <span class="text-sm text-zinc-400">{{ __('Open in nieuw tabblad') }}</span>
+                                </label>
                             </div>
                         </div>
+
+                        {{-- Divider --}}
+                        <div class="border-t border-zinc-700"></div>
+
+                        {{-- Button 2 --}}
                         <div>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" wire:model="button_new_tab" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
-                                <span class="text-sm text-zinc-400">{{ __('Open in nieuw tabblad') }}</span>
-                            </label>
+                            <p class="text-xs font-medium text-zinc-400 mb-2">{{ __('Knop 2') }}</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Label') }}</label>
+                                    <input type="text" wire:model="button2_label" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="Meer info">
+                                    @error('button2_label') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('URL') }}</label>
+                                    <input type="url" wire:model="button2_url" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="https://...">
+                                    @error('button2_url') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" wire:model="button2_new_tab" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
+                                    <span class="text-sm text-zinc-400">{{ __('Open in nieuw tabblad') }}</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 

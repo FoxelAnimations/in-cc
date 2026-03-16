@@ -40,14 +40,24 @@
                 @if ($block->text)
                     <div class="prose prose-invert prose-lg prose-zinc font-description max-w-none break-words content-block-text">{!! $block->text !!}</div>
                 @endif
-                @if ($block->hasButton())
-                    <div class="mt-6">
-                        <a href="{{ $block->button_url }}"
-                           @if($block->button_new_tab) target="_blank" rel="noopener" @endif
-                           class="inline-flex items-center bg-accent text-black px-6 py-3 text-lg font-bold uppercase tracking-wider transition hover:brightness-90">
-                            {{ $block->button_label }}
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                        </a>
+                @if ($block->hasButton() || $block->hasButton2())
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        @if ($block->hasButton())
+                            <a href="{{ $block->button_url }}"
+                               @if($block->button_new_tab) target="_blank" rel="noopener" @endif
+                               class="inline-flex items-center bg-accent text-black px-6 py-3 text-lg font-bold uppercase tracking-wider transition hover:brightness-90">
+                                {{ $block->button_label }}
+                                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                            </a>
+                        @endif
+                        @if ($block->hasButton2())
+                            <a href="{{ $block->button2_url }}"
+                               @if($block->button2_new_tab) target="_blank" rel="noopener" @endif
+                               class="inline-flex items-center border-2 border-accent text-accent px-6 py-3 text-lg font-bold uppercase tracking-wider transition hover:bg-accent hover:text-black">
+                                {{ $block->button2_label }}
+                                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                            </a>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -64,14 +74,24 @@
             @if ($block->text)
                 <div class="prose prose-invert prose-lg prose-zinc font-description max-w-none break-words content-block-text">{!! $block->text !!}</div>
             @endif
-            @if ($block->hasButton())
-                <div class="mt-6">
-                    <a href="{{ $block->button_url }}"
-                       @if($block->button_new_tab) target="_blank" rel="noopener" @endif
-                       class="inline-flex items-center bg-accent text-black px-6 py-3 text-lg font-bold uppercase tracking-wider transition hover:brightness-90">
-                        {{ $block->button_label }}
-                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                    </a>
+            @if ($block->hasButton() || $block->hasButton2())
+                <div class="mt-6 flex flex-wrap justify-center gap-3">
+                    @if ($block->hasButton())
+                        <a href="{{ $block->button_url }}"
+                           @if($block->button_new_tab) target="_blank" rel="noopener" @endif
+                           class="inline-flex items-center bg-accent text-black px-6 py-3 text-lg font-bold uppercase tracking-wider transition hover:brightness-90">
+                            {{ $block->button_label }}
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    @endif
+                    @if ($block->hasButton2())
+                        <a href="{{ $block->button2_url }}"
+                           @if($block->button2_new_tab) target="_blank" rel="noopener" @endif
+                           class="inline-flex items-center border-2 border-accent text-accent px-6 py-3 text-lg font-bold uppercase tracking-wider transition hover:bg-accent hover:text-black">
+                            {{ $block->button2_label }}
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    @endif
                 </div>
             @endif
         </div>

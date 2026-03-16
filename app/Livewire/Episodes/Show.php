@@ -14,7 +14,6 @@ class Show extends Component
             'episodes' => Episode::with(['characters.job', 'characters.socialLinks'])->where('category', 'episode')->where('visible', true)->orderBy('sort_order')->get(),
             'shorts' => Episode::with(['characters.job', 'characters.socialLinks'])->where('category', 'short')->where('visible', true)->orderBy('sort_order')->get(),
             'minis' => Episode::with(['characters.job', 'characters.socialLinks'])->where('category', 'mini')->where('visible', true)->orderBy('sort_order')->get(),
-            'specials' => Episode::with(['characters.job', 'characters.socialLinks'])->where('category', 'special')->where('visible', true)->orderBy('sort_order')->get(),
             'ageGate' => AgeGate::first(),
         ])->layoutData(['bgClass' => 'bg-black']);
     }

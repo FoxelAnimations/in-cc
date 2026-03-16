@@ -18,6 +18,9 @@ class ContentBlock extends Model
         'button_url',
         'button_color',
         'button_new_tab',
+        'button2_label',
+        'button2_url',
+        'button2_new_tab',
         'separator_color',
         'is_active',
         'placement',
@@ -29,6 +32,7 @@ class ContentBlock extends Model
         return [
             'is_active' => 'boolean',
             'button_new_tab' => 'boolean',
+            'button2_new_tab' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
@@ -56,6 +60,11 @@ class ContentBlock extends Model
     public function hasButton(): bool
     {
         return !empty($this->button_label) && !empty($this->button_url);
+    }
+
+    public function hasButton2(): bool
+    {
+        return !empty($this->button2_label) && !empty($this->button2_url);
     }
 
     public function getYoutubeEmbedUrlAttribute(): ?string

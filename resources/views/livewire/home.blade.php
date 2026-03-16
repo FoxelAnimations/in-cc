@@ -331,7 +331,6 @@
             ['items' => $latestEpisodes, 'title' => 'Episodes'],
             ['items' => $latestShorts, 'title' => 'Shorts'],
             ['items' => $latestMinis, 'title' => 'Minis'],
-            ['items' => $latestSpecials, 'title' => 'Specials'],
         ] as $section)
             @if ($section['items']->isNotEmpty())
                 <section class="py-8 md:py-12 scroll-mt-16">
