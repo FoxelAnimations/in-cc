@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -69,5 +70,12 @@ class User extends Authenticatable
             'is_blocked' => 'boolean',
             'last_active_at' => 'datetime',
         ];
+    }
+
+    public function collectedBeacons(): BelongsToMany
+    {
+        return $this->belongsToMany(Beacon::class, 'beacon_user')
+            ->withPivot('collected_at')
+            ->withCasts(['collected_at' => 'datetime']);
     }
 }

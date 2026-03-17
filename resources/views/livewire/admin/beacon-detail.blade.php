@@ -233,6 +233,38 @@
                     </div>
                 </div>
 
+                {{-- Collectible / Badge --}}
+                <div class="rounded-sm bg-zinc-900 border border-zinc-800 p-5 space-y-4">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-zinc-400 mb-3">Collectible Reward</h3>
+
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" wire:model.live="isCollectible" class="rounded-sm border-zinc-700 bg-zinc-800 text-accent focus:ring-accent">
+                        <span class="text-zinc-300">Collectible</span>
+                    </label>
+                    <p class="text-xs text-zinc-600">When enabled, logged-in users who scan this beacon will collect it as a badge on their dashboard.</p>
+
+                    @if ($isCollectible)
+                        <div class="pt-2 space-y-3">
+                            <label class="block text-sm font-medium text-zinc-400 mb-1">Badge Image</label>
+
+                            @if ($beacon->badge_image_path)
+                                <div class="flex items-start gap-4">
+                                    <img src="{{ Storage::url($beacon->badge_image_path) }}" alt="Badge" class="w-24 h-24 object-contain rounded-sm border border-zinc-700 bg-zinc-800 p-1">
+                                    <button type="button" wire:click="removeBadgeImage" wire:confirm="Remove badge image?"
+                                        class="inline-flex items-center px-2 py-1 text-xs font-semibold bg-red-900/30 text-red-400 border border-red-800 rounded-sm transition hover:bg-red-900/50 uppercase tracking-wider">
+                                        Remove
+                                    </button>
+                                </div>
+                            @endif
+
+                            <input type="file" wire:model="badgeImage" accept="image/*"
+                                class="w-full text-sm text-zinc-400 file:mr-3 file:py-2 file:px-3 file:border-0 file:text-sm file:font-semibold file:bg-zinc-800 file:text-zinc-300 file:cursor-pointer hover:file:bg-zinc-700">
+                            <p class="text-[10px] text-zinc-600">Square image recommended (e.g. 512x512). Max 4MB.</p>
+                            @error('badgeImage') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
+                        </div>
+                    @endif
+                </div>
+
                 {{-- Out of Action Configuration --}}
                 <div class="rounded-sm bg-zinc-900 border border-zinc-800 p-5 space-y-4">
                     <h3 class="text-sm font-semibold uppercase tracking-wider text-zinc-400 mb-3">Out of Action Behavior</h3>

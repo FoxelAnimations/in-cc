@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Beacon;
 use App\Services\BeaconScanService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 
 class BeaconController extends Controller
@@ -39,6 +40,8 @@ class BeaconController extends Controller
 
             $this->scanService->logScan($request, $guid, $beacon, $redirectUrl, $isRateLimited);
 
+            $this->collectForUser($beacon);
+
             return match ($behavior['type']) {
                 'redirect' => redirect($redirectUrl),
                 'page' => response()->view('beacon.out-of-action', [
@@ -53,10 +56,24 @@ class BeaconController extends Controller
             };
         }
 
+        // Collect beacon for logged-in user (unique, only collectible beacons)
+        $this->collectForUser($beacon);
+
         // Normal flow: online or offline — both redirect
         $redirectUrl = $this->scanService->resolveRedirectUrl($beacon);
         $this->scanService->logScan($request, $guid, $beacon, $redirectUrl, $isRateLimited);
 
         return redirect($redirectUrl);
+    }
+
+    private function collectForUser(Beacon $beacon): void
+    {
+        if (!$beacon->is_collectible || !Auth::check()) {
+            return;
+        }
+
+        Auth::user()->collectedBeacons()->syncWithoutDetaching([
+            $beacon->id => ['collected_at' => now()],
+        ]);
     }
 }

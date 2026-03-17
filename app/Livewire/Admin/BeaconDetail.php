@@ -30,6 +30,8 @@ class BeaconDetail extends Component
     public string $redirectUrl = '';
     public bool $isOnline = true;
     public bool $isOutOfAction = false;
+    public bool $isCollectible = false;
+    public $badgeImage = null;
     public string $outOfActionMode = 'showPage';
     public string $outOfActionRedirectUrl = '';
     public string $outOfActionMessage = '';
@@ -53,6 +55,7 @@ class BeaconDetail extends Component
         $this->redirectUrl = $this->beacon->redirect_url ?? '';
         $this->isOnline = $this->beacon->is_online;
         $this->isOutOfAction = $this->beacon->is_out_of_action;
+        $this->isCollectible = $this->beacon->is_collectible;
         $this->outOfActionMode = $this->beacon->out_of_action_mode ?? 'showPage';
         $this->outOfActionRedirectUrl = $this->beacon->out_of_action_redirect_url ?? '';
         $this->outOfActionMessage = $this->beacon->out_of_action_message ?? '';
@@ -70,6 +73,8 @@ class BeaconDetail extends Component
             'redirectUrl' => ['nullable', 'string', 'max:2048'],
             'isOnline' => ['boolean'],
             'isOutOfAction' => ['boolean'],
+            'isCollectible' => ['boolean'],
+            'badgeImage' => ['nullable', 'image', 'max:4096'],
             'outOfActionMode' => ['required', 'in:redirect,redirectCustom,showPage,block'],
             'outOfActionRedirectUrl' => ['nullable', 'string', 'max:2048'],
             'outOfActionMessage' => ['nullable', 'string'],
@@ -85,6 +90,14 @@ class BeaconDetail extends Component
             $this->beacon->image_path = $this->image->store('beacons', 'public');
         }
 
+        $badgeImagePath = $this->beacon->badge_image_path;
+        if ($this->badgeImage) {
+            if ($badgeImagePath) {
+                Storage::disk('public')->delete($badgeImagePath);
+            }
+            $badgeImagePath = $this->badgeImage->store('beacons/badges', 'public');
+        }
+
         $this->beacon->update([
             'title' => $this->title,
             'description' => $this->description ?: null,
@@ -95,6 +108,8 @@ class BeaconDetail extends Component
             'redirect_url' => $this->redirectUrl ?: null,
             'is_online' => $this->isOnline,
             'is_out_of_action' => $this->isOutOfAction,
+            'is_collectible' => $this->isCollectible,
+            'badge_image_path' => $badgeImagePath,
             'out_of_action_mode' => $this->outOfActionMode,
             'out_of_action_redirect_url' => $this->outOfActionRedirectUrl ?: null,
             'out_of_action_message' => $this->outOfActionMessage ?: null,
@@ -114,6 +129,7 @@ class BeaconDetail extends Component
 
         $this->beacon->refresh();
         $this->image = null;
+        $this->badgeImage = null;
         $this->newImages = [];
         session()->flash('status', 'Beacon updated.');
     }
@@ -123,6 +139,15 @@ class BeaconDetail extends Component
         if ($this->beacon->image_path) {
             Storage::disk('public')->delete($this->beacon->image_path);
             $this->beacon->update(['image_path' => null]);
+            $this->beacon->refresh();
+        }
+    }
+
+    public function removeBadgeImage(): void
+    {
+        if ($this->beacon->badge_image_path) {
+            Storage::disk('public')->delete($this->beacon->badge_image_path);
+            $this->beacon->update(['badge_image_path' => null]);
             $this->beacon->refresh();
         }
     }

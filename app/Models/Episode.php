@@ -37,6 +37,16 @@ class Episode extends Model
         return $this->belongsToMany(Character::class);
     }
 
+    public function ratings()
+    {
+        return $this->hasMany(EpisodeRating::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(EpisodeComment::class);
+    }
+
     public function isYoutube(): bool
     {
         return $this->source_type === 'youtube';
