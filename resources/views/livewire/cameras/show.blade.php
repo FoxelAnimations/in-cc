@@ -44,7 +44,8 @@
     <div class="max-w-[1800px] mx-auto flex flex-col lg:flex-row" style="height: calc(100vh - 7rem);">
 
         {{-- Camera Feed --}}
-        <div class="flex-1 relative overflow-hidden min-h-0">
+        <div class="flex-1 relative overflow-hidden min-h-0 flex items-center justify-center bg-black">
+          <div class="relative w-full h-full" style="max-width: min(100%, calc((100vh - 7rem))); aspect-ratio: 1 / 1; margin: 0 auto;">
             {{-- Sky background layer --}}
             <div class="absolute inset-0 z-[0]" :style="{ backgroundColor: skyColor }">
                 <template x-if="backgroundIsVideo && backgroundUrl">
@@ -122,6 +123,7 @@
                 <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                 <span class="text-[10px] font-bold text-red-500/80 tracking-wider">REC</span>
             </div>
+          </div>
         </div>
 
         {{-- Chat Panel --}}

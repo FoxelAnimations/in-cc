@@ -29,10 +29,14 @@
 
     {{-- Input area --}}
     @auth
-        <form wire:submit="sendMessage" class="px-3 py-2 border-t border-zinc-700/50 shrink-0">
+        <form wire:submit="sendMessage" class="px-3 py-2 border-t border-zinc-700/50 shrink-0"
+            x-data
+            @submit="$nextTick(() => $refs.chatInput.focus())">
             <div class="flex gap-2">
                 <input type="text"
                     wire:model="message"
+                    x-ref="chatInput"
+                    x-init="$el.focus()"
                     maxlength="200"
                     placeholder="Typ een bericht..."
                     autocomplete="off"
