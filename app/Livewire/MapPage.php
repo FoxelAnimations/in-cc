@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Location;
 use App\Models\LocationCategory;
+use App\Models\SiteSetting;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -33,6 +34,13 @@ class MapPage extends Component
 
     public function mount(): void
     {
+        // If map is hidden, only admins can access
+        $settings = SiteSetting::first();
+        if (!$settings?->show_map && !Auth::user()?->is_admin) {
+            $this->redirect('/');
+            return;
+        }
+
         if (Auth::check()) {
             $this->revealedLocationIds = Auth::user()
                 ->revealedLocations()->pluck('locations.id')->toArray();

@@ -90,7 +90,7 @@
     async handleApiScan(guid) {
         this.result = '{{ __('Beacon gevonden! Verwerken…') }}';
         try {
-            const res = await fetch('/api/beacon/' + encodeURIComponent(guid) + '/scan', {
+            const res = await fetch('/beacon/' + encodeURIComponent(guid) + '/scan', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '',

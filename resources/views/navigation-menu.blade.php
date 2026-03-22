@@ -19,7 +19,9 @@
                     <a href="{{ route('collabs') }}" class="{{ request()->routeIs('collabs*') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">COLLABS</a>
                 @endif
                 <a href="{{ route('cameras.index') }}" class="{{ request()->routeIs('cameras.*') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">CAMERA'S</a>
-                <a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">DE KAART</a>
+                @if(\App\Models\SiteSetting::first()?->show_map || auth()->user()?->is_admin)
+                    <a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">DE KAART</a>
+                @endif
                 @auth
                     @can('access-admin')
                         <a href="{{ route('admin.dashboard') }}" class="text-[#E7FF57] text-lg tracking-widest transition hover:brightness-90">ADMIN</a>
@@ -89,7 +91,9 @@
                 <a href="{{ route('collabs') }}" @click="open = false" class="{{ request()->routeIs('collabs*') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">COLLABS</a>
             @endif
             <a href="{{ route('cameras.index') }}" @click="open = false" class="{{ request()->routeIs('cameras.*') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">CAMERA'S</a>
-            <a href="{{ route('map') }}" @click="open = false" class="{{ request()->routeIs('map') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">MAP</a>
+            @if(\App\Models\SiteSetting::first()?->show_map || auth()->user()?->is_admin)
+                <a href="{{ route('map') }}" @click="open = false" class="{{ request()->routeIs('map') ? 'text-[#E7FF57]' : 'text-white' }} text-2xl tracking-widest hover:text-[#E7FF57] transition">DE KAART</a>
+            @endif
             @auth
                 @can('access-admin')
                     <a href="{{ route('admin.dashboard') }}" @click="open = false" class="text-[#E7FF57] text-2xl tracking-widest hover:brightness-90 transition">ADMIN</a>

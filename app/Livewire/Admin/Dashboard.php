@@ -36,6 +36,7 @@ class Dashboard extends Component
     public bool $showMinis = true;
     public bool $showSpecials = true;
     public bool $showCollabs = false;
+    public bool $showMap = false;
     public bool $showQuotes = true;
     public string $carouselTitle = '';
     public int $badgePopupTimeout = 5;
@@ -306,6 +307,7 @@ class Dashboard extends Component
             $this->showMinis = $settings->show_minis ?? true;
             $this->showSpecials = $settings->show_specials ?? true;
             $this->showCollabs = $settings->show_collabs ?? false;
+            $this->showMap = $settings->show_map ?? false;
             $this->showQuotes = $settings->show_quotes ?? true;
             $this->carouselTitle = $settings->carousel_title ?? '';
         }
@@ -319,6 +321,7 @@ class Dashboard extends Component
             'show_minis' => $this->showMinis,
             'show_specials' => $this->showSpecials,
             'show_collabs' => $this->showCollabs,
+            'show_map' => $this->showMap,
             'show_quotes' => $this->showQuotes,
             'carousel_title' => $this->carouselTitle ?: null,
         ]);

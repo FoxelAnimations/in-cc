@@ -69,6 +69,12 @@ class BeaconController extends Controller
         if ($user) {
             if ($isNewCollection) {
                 $this->processBadgesAndLocations($user, $beacon);
+
+                if (session()->has('badge_popups')) {
+                    $dashboardUrl = route('dashboard');
+                    $this->scanService->logScan($request, $guid, $beacon, $dashboardUrl, $isRateLimited);
+                    return redirect($dashboardUrl);
+                }
             } elseif ($beacon->locations()->exists()) {
                 // Repeat scan (beacon already collected) with linked location → redirect to map
                 $mapUrl = route('map');

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BeaconController;
+use App\Http\Controllers\BeaconScanApiController;
 use App\Livewire\Characters\Index as CharacterIndex;
 use App\Livewire\Episodes\Show as EpisodeShow;
 use App\Livewire\UserDashboard;
@@ -70,6 +71,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', UserDashboard::class)->name('dashboard');
+    Route::post('/beacon/{guid}/scan', [BeaconScanApiController::class, 'scan'])->name('beacon.scan.api');
 
     Route::middleware('can:access-admin')->group(function () {
         Route::get('/admin', AdminDashboard::class)->name('admin.dashboard');

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\CameraController;
 use App\Http\Controllers\Api\ChatController;
-use App\Http\Controllers\BeaconScanApiController;
 use App\Http\Controllers\EpisodeViewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,5 +27,3 @@ Route::prefix('cameras')->middleware('throttle:60,1')->group(function () {
 Route::post('/episodes/{episode}/view', [EpisodeViewController::class, 'store'])
     ->middleware('throttle:30,1');
 
-Route::post('/beacon/{guid}/scan', [BeaconScanApiController::class, 'scan'])
-    ->middleware(['auth:sanctum', 'throttle:30,1']);
