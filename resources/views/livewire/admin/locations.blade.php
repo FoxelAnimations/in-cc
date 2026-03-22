@@ -206,6 +206,12 @@
                                     marker: null,
                                     init() {
                                         if (typeof L === 'undefined') return;
+                                        this.$nextTick(() => {
+                                            setTimeout(() => this.initMap(), 100);
+                                        });
+                                    },
+                                    initMap() {
+                                        if (this.map) return;
                                         const lat = parseFloat($wire.latitude) || 51.05;
                                         const lng = parseFloat($wire.longitude) || 3.72;
                                         this.map = L.map(this.$el).setView([lat, lng], 13);
@@ -223,6 +229,7 @@
                                             $wire.set('latitude', e.latlng.lat.toFixed(7));
                                             $wire.set('longitude', e.latlng.lng.toFixed(7));
                                         });
+                                        setTimeout(() => this.map.invalidateSize(), 150);
                                     }
                                 }"></div>
                         </div>

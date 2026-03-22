@@ -66,7 +66,7 @@ class MapPage extends Component
                 'id' => $location->id,
                 'lat' => (float) $location->latitude,
                 'lng' => (float) $location->longitude,
-                'title' => $showFull ? $location->title : 'Hidden Location',
+                'title' => $showFull ? $location->title : 'Verborgen locatie',
                 'description' => $showFull ? ($location->description ?? '') : ($location->hidden_description ?? ''),
                 'image' => $showFull && $location->image_path ? Storage::url($location->image_path) : null,
                 'address' => $showFull ? $location->address : null,

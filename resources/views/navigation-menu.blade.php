@@ -19,7 +19,7 @@
                     <a href="{{ route('collabs') }}" class="{{ request()->routeIs('collabs*') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">COLLABS</a>
                 @endif
                 <a href="{{ route('cameras.index') }}" class="{{ request()->routeIs('cameras.*') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">CAMERA'S</a>
-                <a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">MAP</a>
+                <a href="{{ route('map') }}" class="{{ request()->routeIs('map') ? 'text-[#E7FF57]' : 'text-white' }} text-lg tracking-widest transition hover:text-[#E7FF57]">DE KAART</a>
                 @auth
                     @can('access-admin')
                         <a href="{{ route('admin.dashboard') }}" class="text-[#E7FF57] text-lg tracking-widest transition hover:brightness-90">ADMIN</a>

@@ -73,6 +73,9 @@ class UserDashboard extends Component
             'welcomeText' => $settings?->dashboard_welcome_text,
             'newsItems' => $newsItems,
             'showNews' => $showNews,
+            'badgeSectionLabel' => $settings?->badge_section_label,
+            'badgeSectionTitle' => $settings?->badge_section_title,
+            'badgeSectionText' => $settings?->badge_section_text,
         ])->layoutData(['bgClass' => 'bg-black']);
     }
 }

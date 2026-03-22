@@ -5,7 +5,7 @@
         <div class="border border-zinc-800 bg-zinc-900 rounded-sm p-8 mb-10">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold uppercase tracking-wider">{{ $welcomeTitle ?? __('Welcome back!') }}</h1>
+                    <h1 class="text-2xl font-bold uppercase tracking-wider">{{ $welcomeTitle ?? __('Welkom terug!') }}</h1>
                     @if($welcomeText)
                         <p class="mt-2 text-zinc-400 text-sm">{{ $welcomeText }}</p>
                     @endif
@@ -13,14 +13,14 @@
                         <form wire:submit="saveName" class="mt-3 flex items-center gap-3">
                             <input type="text" wire:model="userName"
                                 class="bg-zinc-800 border border-zinc-700 text-white px-3 py-1.5 text-sm focus:border-accent focus:ring-accent rounded-sm w-64"
-                                placeholder="{{ __('Your name') }}">
+                                placeholder="{{ __('Je naam') }}">
                             <button type="submit"
                                 class="px-3 py-1.5 text-xs font-semibold bg-accent text-black uppercase tracking-wider transition hover:brightness-90">
-                                {{ __('Save') }}
+                                {{ __('Opslaan') }}
                             </button>
                             <button type="button" wire:click="cancelEditingName"
                                 class="px-3 py-1.5 text-xs font-semibold border border-zinc-700 text-zinc-400 uppercase tracking-wider transition hover:text-white hover:border-zinc-500">
-                                {{ __('Cancel') }}
+                                {{ __('Annuleren') }}
                             </button>
                         </form>
                         @error('userName') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
@@ -28,7 +28,7 @@
                         <p class="mt-2 text-zinc-400 flex items-center gap-2">
                             {{ auth()->user()->name }}
                             <button wire:click="startEditingName" class="text-accent text-xs uppercase tracking-wider hover:brightness-90 transition">
-                                {{ __('Edit') }}
+                                {{ __('Bewerken') }}
                             </button>
                         </p>
                     @endif
@@ -56,18 +56,22 @@
         {{-- Earned Badges (new Badge model) --}}
         <div class="border border-zinc-800 bg-zinc-900 rounded-sm p-8 mb-10">
             <div class="mb-6">
-                <p class="text-sm tracking-[0.3em] uppercase text-zinc-500 mb-1">{{ __('Collection') }}</p>
-                <h2 class="text-3xl font-bold uppercase tracking-wider">{{ __('Your Badges') }}</h2>
-                <p class="mt-2 text-zinc-400 text-sm">
-                    {{ __('Scan beacons to collect badges. You have :count so far!', ['count' => $earnedBadges->count()]) }}
-                </p>
+                <p class="text-sm tracking-[0.3em] uppercase text-zinc-500 mb-1">{{ $badgeSectionLabel ?? __('Collectie') }}</p>
+                <h2 class="text-3xl font-bold uppercase tracking-wider">{{ $badgeSectionTitle ?? __('Jouw Badges') }}</h2>
+                @if($badgeSectionText ?? null)
+                    <p class="mt-2 text-zinc-400 text-sm">{{ $badgeSectionText }}</p>
+                @else
+                    <p class="mt-2 text-zinc-400 text-sm">
+                        {{ __('Scan beacons om badges te verzamelen. Je hebt er al :count!', ['count' => $earnedBadges->count()]) }}
+                    </p>
+                @endif
             </div>
 
             @if ($earnedBadges->isEmpty())
                 <div class="text-center py-12 text-zinc-600">
                     <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-                    <p class="text-lg font-semibold uppercase tracking-wider">{{ __('No badges yet') }}</p>
-                    <p class="mt-1 text-sm">{{ __('Start scanning beacons to build your collection!') }}</p>
+                    <p class="text-lg font-semibold uppercase tracking-wider">{{ __('Nog geen badges') }}</p>
+                    <p class="mt-1 text-sm">{{ __('Begin met het scannen van beacons om je collectie op te bouwen!') }}</p>
                 </div>
             @else
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -103,7 +107,7 @@
         <div class="border border-zinc-800 bg-zinc-900 rounded-sm p-8">
             <div class="mb-6">
                 <p class="text-sm tracking-[0.3em] uppercase text-zinc-500 mb-1">{{ __('Beacons') }}</p>
-                <h2 class="text-3xl font-bold uppercase tracking-wider">{{ __('Collected Beacons') }}</h2>
+                <h2 class="text-3xl font-bold uppercase tracking-wider">{{ __('Verzamelde Beacons') }}</h2>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">

@@ -32,6 +32,9 @@ class SiteSetting extends Model
         'dashboard_welcome_text',
         'dashboard_news_items',
         'dashboard_news_updated_at',
+        'badge_section_label',
+        'badge_section_title',
+        'badge_section_text',
     ];
 
     protected function casts(): array

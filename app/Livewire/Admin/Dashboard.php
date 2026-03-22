@@ -43,6 +43,9 @@ class Dashboard extends Component
     public string $dashboardWelcomeText = '';
     public array $dashboardNewsItems = [];
     public string $newNewsItem = '';
+    public string $badgeSectionLabel = '';
+    public string $badgeSectionTitle = '';
+    public string $badgeSectionText = '';
 
     public function mount(): void
     {
@@ -331,6 +334,9 @@ class Dashboard extends Component
             $this->dashboardWelcomeTitle = $settings->dashboard_welcome_title ?? '';
             $this->dashboardWelcomeText = $settings->dashboard_welcome_text ?? '';
             $this->dashboardNewsItems = $settings->dashboard_news_items ?? [];
+            $this->badgeSectionLabel = $settings->badge_section_label ?? '';
+            $this->badgeSectionTitle = $settings->badge_section_title ?? '';
+            $this->badgeSectionText = $settings->badge_section_text ?? '';
         }
     }
 
@@ -347,6 +353,24 @@ class Dashboard extends Component
         ]);
 
         session()->flash('status', 'Dashboard welcome text updated.');
+        $this->redirect(route('admin.dashboard'));
+    }
+
+    public function saveBadgeSection(): void
+    {
+        $this->validate([
+            'badgeSectionLabel' => ['nullable', 'string', 'max:255'],
+            'badgeSectionTitle' => ['nullable', 'string', 'max:255'],
+            'badgeSectionText' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        SiteSetting::first()?->update([
+            'badge_section_label' => $this->badgeSectionLabel ?: null,
+            'badge_section_title' => $this->badgeSectionTitle ?: null,
+            'badge_section_text' => $this->badgeSectionText ?: null,
+        ]);
+
+        session()->flash('status', 'Badge section text updated.');
         $this->redirect(route('admin.dashboard'));
     }
 

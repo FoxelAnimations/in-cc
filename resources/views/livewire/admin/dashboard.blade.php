@@ -391,6 +391,34 @@
 
                 <div class="border-t border-zinc-800"></div>
 
+                {{-- Badge Section Text --}}
+                <div>
+                    <h3 class="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">{{ __('Badge Section') }}</h3>
+                    <p class="text-xs text-zinc-500 mb-3">{{ __('Customise the label, title, and description shown above the badges on the user dashboard.') }}</p>
+                    <form wire:submit="saveBadgeSection" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Label') }}</label>
+                            <input type="text" wire:model="badgeSectionLabel" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="Collection">
+                            @error('badgeSectionLabel') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Title') }}</label>
+                            <input type="text" wire:model="badgeSectionTitle" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="Your Badges">
+                            @error('badgeSectionTitle') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-zinc-500 mb-1">{{ __('Text') }}</label>
+                            <input type="text" wire:model="badgeSectionText" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="Scan beacons to collect badges.">
+                            @error('badgeSectionText') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        <button type="submit" class="inline-flex items-center bg-accent text-black px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90">
+                            {{ __('Save Badge Section') }}
+                        </button>
+                    </form>
+                </div>
+
+                <div class="border-t border-zinc-800"></div>
+
                 {{-- Nieuwtjes --}}
                 <div>
                     <h3 class="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">{{ __('Nieuwtjes') }}</h3>

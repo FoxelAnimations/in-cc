@@ -6,15 +6,15 @@
 
         {{-- Header --}}
         <div class="mb-6">
-            <p class="text-sm tracking-[0.3em] uppercase text-zinc-500 mb-1">{{ __('Explore') }}</p>
-            <h1 class="text-3xl font-bold uppercase tracking-wider">{{ __('Locations') }}</h1>
+            <p class="text-sm tracking-[0.3em] uppercase text-zinc-500 mb-1">{{ __('Ontdek') }}</p>
+            <h1 class="text-3xl font-bold uppercase tracking-wider">{{ __('De Kaart') }}</h1>
         </div>
 
         {{-- Filters --}}
         <div class="flex flex-wrap gap-3 mb-4">
             <select wire:model.live="filterCategory"
                 class="bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm">
-                <option value="">{{ __('All Categories') }}</option>
+                <option value="">{{ __('Alle categorieën') }}</option>
                 @foreach ($categories as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                 @endforeach
@@ -22,9 +22,9 @@
             @auth
                 <select wire:model.live="filterStatus"
                     class="bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm">
-                    <option value="">{{ __('All') }}</option>
-                    <option value="revealed">{{ __('Revealed') }}</option>
-                    <option value="unrevealed">{{ __('Not Yet Revealed') }}</option>
+                    <option value="">{{ __('Alles') }}</option>
+                    <option value="revealed">{{ __('Ontdekt') }}</option>
+                    <option value="unrevealed">{{ __('Nog niet ontdekt') }}</option>
                 </select>
             @endauth
         </div>
@@ -89,7 +89,7 @@
 
                 <button @click="open = false"
                     class="mt-4 px-4 py-2 text-sm font-semibold border border-zinc-700 text-zinc-400 uppercase tracking-wider transition hover:text-white hover:border-zinc-500">
-                    {{ __('Close') }}
+                    {{ __('Sluiten') }}
                 </button>
             </div>
         </div>
@@ -106,50 +106,60 @@
                 stylesAdded: false,
 
                 initMap() {
-                    const defaultLat = 51.05;
-                    const defaultLng = 3.72;
-                    const defaultZoom = 13;
+                    // Default: Kortrijk
+                    const defaultLat = 50.8279;
+                    const defaultLng = 3.2654;
+                    const defaultZoom = 14;
 
-                    this.map = L.map('location-map').setView([defaultLat, defaultLng], defaultZoom);
+                    this.map = L.map('location-map', {
+                        zoomControl: false
+                    }).setView([defaultLat, defaultLng], defaultZoom);
 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                        className: 'grayscale-tiles'
+                    L.control.zoom({ position: 'topright' }).addTo(this.map);
+
+                    // CartoDB Positron — clean, minimal, simplified cartoonish look
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+                        subdomains: 'abcd',
+                        maxZoom: 19,
+                        className: 'map-tiles'
                     }).addTo(this.map);
 
                     if (!this.stylesAdded) {
                         const style = document.createElement('style');
-                        style.textContent = '.grayscale-tiles { filter: grayscale(100%) !important; -webkit-filter: grayscale(100%) !important; } .custom-marker { background: none !important; border: none !important; }';
+                        style.textContent = `
+                            .map-tiles { filter: grayscale(100%) brightness(0.35) contrast(1.2) !important; }
+                            .custom-marker { background: none !important; border: none !important; }
+                            .custom-marker svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transition: transform 0.15s ease; }
+                            .custom-marker:hover svg { transform: scale(1.18) translateY(-3px); }
+                            #location-map { background: #111 !important; }
+                            .leaflet-control-zoom a { background: #18181b !important; color: #a1a1aa !important; border-color: #27272a !important; }
+                            .leaflet-control-zoom a:hover { color: #fff !important; }
+                            .leaflet-control-attribution { background: rgba(0,0,0,0.6) !important; color: #52525b !important; font-size: 9px !important; }
+                            .leaflet-control-attribution a { color: #71717a !important; }
+                        `;
                         document.head.appendChild(style);
                         this.stylesAdded = true;
                     }
 
-                    this.accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#f59e0b';
+                    this.accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#E7FF57';
 
-                    // Initial render
                     this.updateMarkers(this.$wire.mapLocations);
 
-                    // Watch for Livewire property changes
                     this.$wire.$watch('mapLocations', (newLocations) => {
                         this.updateMarkers(newLocations);
                     });
                 },
 
                 updateMarkers(locations) {
-                    // Remove existing markers
                     this.markers.forEach(m => m.remove());
                     this.markers = [];
-
                     const bounds = [];
 
                     locations.forEach(loc => {
                         const isHiddenUnrevealed = loc.is_hidden && !loc.is_revealed;
                         const hasCheckmark = loc.is_scanned;
-
-                        const icon = this.createMarkerIcon(
-                            isHiddenUnrevealed ? '?' : 'pin',
-                            hasCheckmark
-                        );
+                        const icon = this.createMarkerIcon(isHiddenUnrevealed ? '?' : 'pin', hasCheckmark);
 
                         const marker = L.marker([loc.lat, loc.lng], { icon }).addTo(this.map);
                         bounds.push([loc.lat, loc.lng]);
@@ -157,7 +167,6 @@
                         marker.on('click', () => {
                             window.dispatchEvent(new CustomEvent('open-location', { detail: loc }));
                         });
-
                         this.markers.push(marker);
                     });
 
@@ -168,20 +177,34 @@
 
                 createMarkerIcon(symbol, hasCheckmark) {
                     const c = this.accentColor;
+
+                    // Chunky rounded checkmark badge
                     const checkSvg = hasCheckmark
-                        ? `<circle cx="28" cy="8" r="7" fill="${c}" stroke="#000" stroke-width="1"/><path d="M24 8 L27 11 L32 5" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+                        ? `<circle cx="32" cy="9" r="9" fill="${c}" stroke="#18181b" stroke-width="2.5"/>
+                           <path d="M28 9 L31 12 L37 6" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
                         : '';
 
-                    const svgContent = symbol === '?'
-                        ? `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44"><path d="M18 42 C18 42 2 26 2 16 C2 7.16 9.16 0 18 0 S34 7.16 34 16 C34 26 18 42 18 42Z" fill="${c}" stroke="#000" stroke-width="1.5"/><text x="18" y="22" text-anchor="middle" font-size="18" font-weight="bold" fill="#000">?</text>${checkSvg}</svg>`
-                        : `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44"><path d="M18 42 C18 42 2 26 2 16 C2 7.16 9.16 0 18 0 S34 7.16 34 16 C34 26 18 42 18 42Z" fill="${c}" stroke="#000" stroke-width="1.5"/><circle cx="18" cy="16" r="6" fill="#000" opacity="0.3"/><circle cx="18" cy="16" r="4" fill="#fff"/>${checkSvg}</svg>`;
+                    // Bigger, rounder, bolder — friendly cartoon pin
+                    const svg = symbol === '?'
+                        ? `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="52" viewBox="0 0 42 52">
+                            <path d="M21 49 C21 49 3 30 3 18 C3 8.6 11.06 1 21 1 S39 8.6 39 18 C39 30 21 49 21 49Z" fill="${c}" stroke="#18181b" stroke-width="3" stroke-linejoin="round"/>
+                            <circle cx="21" cy="18" r="13" fill="#18181b" opacity="0.15"/>
+                            <text x="21" y="25" text-anchor="middle" font-size="22" font-weight="900" font-family="system-ui,sans-serif" fill="#18181b">?</text>
+                            ${checkSvg}
+                           </svg>`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="52" viewBox="0 0 42 52">
+                            <path d="M21 49 C21 49 3 30 3 18 C3 8.6 11.06 1 21 1 S39 8.6 39 18 C39 30 21 49 21 49Z" fill="${c}" stroke="#18181b" stroke-width="3" stroke-linejoin="round"/>
+                            <circle cx="21" cy="18" r="7" fill="#18181b" opacity="0.2"/>
+                            <circle cx="21" cy="18" r="5" fill="#fff"/>
+                            ${checkSvg}
+                           </svg>`;
 
                     return L.divIcon({
-                        html: svgContent,
+                        html: svg,
                         className: 'custom-marker',
-                        iconSize: [36, 44],
-                        iconAnchor: [18, 44],
-                        popupAnchor: [0, -44]
+                        iconSize: [42, 52],
+                        iconAnchor: [21, 52],
+                        popupAnchor: [0, -52]
                     });
                 }
             };
