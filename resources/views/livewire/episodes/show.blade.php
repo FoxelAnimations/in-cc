@@ -173,11 +173,28 @@
             @click.self="close()"
             style="display: none;"
         >
-            <button @click="close()" class="absolute top-2 right-2 md:top-4 md:right-4 z-20 text-white hover:text-accent transition">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-
             <div class="w-full md:max-w-5xl md:max-h-full" @click.stop>
+                {{-- Header Bar --}}
+                <div class="bg-zinc-900/80 border-b border-zinc-800 md:rounded-t-sm">
+                    <div class="px-4 py-2 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <button @click="close()" class="text-zinc-400 hover:text-white transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            </button>
+                            <span class="text-sm uppercase tracking-wider font-semibold text-white truncate max-w-[250px] sm:max-w-none" x-text="episode?.title"></span>
+                            <template x-if="episode?.ageRestricted">
+                                <span class="px-2 py-0.5 text-xs font-bold uppercase tracking-wider bg-red-600 text-white shrink-0">18+</span>
+                            </template>
+                            <template x-if="episode?.isYoutube">
+                                <span class="hidden sm:inline-flex px-2 py-0.5 text-xs font-semibold uppercase tracking-wider bg-red-600 text-white shrink-0">YouTube</span>
+                            </template>
+                        </div>
+                        <button @click="close()" class="text-zinc-400 hover:text-white transition shrink-0 ml-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+
                 {{-- Age Gate Overlay --}}
                 <template x-if="episode?.ageRestricted && !ageConfirmed">
                     <div class="aspect-video bg-zinc-900 rounded-sm overflow-hidden mb-4 flex flex-col items-center justify-center text-center p-8">
