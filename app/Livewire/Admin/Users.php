@@ -26,7 +26,6 @@ class Users extends Component
     public bool $showBadgeModal = false;
     public ?int $badgeUserId = null;
     public ?int $assignBadgeId = null;
-    public int $assignBadgeCount = 1;
 
     public bool $showCreateModal = false;
     public string $newName = '';
@@ -226,58 +225,44 @@ class Users extends Component
     {
         $this->badgeUserId = $id;
         $this->assignBadgeId = null;
-        $this->assignBadgeCount = 1;
         $this->showBadgeModal = true;
     }
 
     public function closeBadges(): void
     {
         $this->showBadgeModal = false;
-        $this->reset(['badgeUserId', 'assignBadgeId', 'assignBadgeCount']);
+        $this->reset(['badgeUserId', 'assignBadgeId']);
     }
 
     public function assignBadge(): void
     {
         $this->validate([
             'assignBadgeId' => ['required', 'exists:badges,id'],
-            'assignBadgeCount' => ['required', 'integer', 'min:1'],
         ]);
 
         $user = User::findOrFail($this->badgeUserId);
 
-        $existing = DB::table('badge_user')
+        $exists = DB::table('badge_user')
             ->where('badge_id', $this->assignBadgeId)
             ->where('user_id', $user->id)
-            ->first();
+            ->exists();
 
-        if ($existing) {
-            DB::table('badge_user')
-                ->where('badge_id', $this->assignBadgeId)
-                ->where('user_id', $user->id)
-                ->update(['count' => $this->assignBadgeCount, 'updated_at' => now()]);
-        } else {
-            DB::table('badge_user')->insert([
-                'badge_id' => $this->assignBadgeId,
-                'user_id' => $user->id,
-                'count' => $this->assignBadgeCount,
-                'collected_at' => now(),
-                'updated_at' => now(),
-            ]);
+        if ($exists) {
+            session()->flash('status', 'User already has this badge.');
+            $this->assignBadgeId = null;
+            return;
         }
 
+        DB::table('badge_user')->insert([
+            'badge_id' => $this->assignBadgeId,
+            'user_id' => $user->id,
+            'count' => 1,
+            'collected_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $this->assignBadgeId = null;
-        $this->assignBadgeCount = 1;
         session()->flash('status', 'Badge assigned.');
-    }
-
-    public function updateBadgeCount(int $badgeId, int $count): void
-    {
-        if ($count < 0) $count = 0;
-
-        DB::table('badge_user')
-            ->where('badge_id', $badgeId)
-            ->where('user_id', $this->badgeUserId)
-            ->update(['count' => $count, 'updated_at' => now()]);
     }
 
     public function removeBadge(int $badgeId): void

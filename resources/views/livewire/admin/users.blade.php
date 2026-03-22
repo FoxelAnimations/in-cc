@@ -250,9 +250,6 @@
                                         <img src="{{ Storage::url($ub->image_path) }}" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
                                     @endif
                                     <span class="text-sm text-white font-medium flex-1">{{ $ub->title }}</span>
-                                    <input type="number" min="0" value="{{ $ub->count }}"
-                                        wire:change="updateBadgeCount({{ $ub->id }}, $event.target.value)"
-                                        class="w-16 bg-zinc-700 border border-zinc-600 text-white px-2 py-1 text-sm text-center rounded-sm focus:border-accent focus:ring-accent">
                                     <button wire:click="removeBadge({{ $ub->id }})"
                                         wire:confirm="Remove this badge from user?"
                                         class="text-red-400 hover:text-red-300 transition text-xs font-semibold uppercase">
@@ -277,11 +274,6 @@
                                         <option value="{{ $badge->id }}">{{ $badge->title }}</option>
                                     @endforeach
                                 </select>
-                            </div>
-                            <div class="w-20">
-                                <input type="number" wire:model="assignBadgeCount" min="1"
-                                    class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm text-center"
-                                    placeholder="Count">
                             </div>
                             <button wire:click="assignBadge"
                                 class="px-4 py-2 text-sm font-semibold bg-accent text-black uppercase tracking-wider transition hover:brightness-90">

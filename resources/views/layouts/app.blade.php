@@ -57,6 +57,10 @@
             <x-character-chat />
         @endif
 
+        @auth
+            <x-qr-scanner-modal redirect-url="/beacon" reader-id="user-qr-reader" />
+        @endauth
+
         @livewireScripts
     </body>
 </html>

@@ -34,40 +34,24 @@ class BadgeScanService
         $toInsert = [];
 
         foreach ($badges as $badge) {
-            $existing = $existingBadges->get($badge->id);
-
-            if (!$existing) {
-                $toInsert[] = [
-                    'badge_id' => $badge->id,
-                    'user_id' => $user->id,
-                    'count' => 1,
-                    'collected_at' => now(),
-                    'updated_at' => now(),
-                ];
-
-                $badgePopups[] = [
-                    'title' => $badge->title,
-                    'image' => $badge->image_path ? Storage::url($badge->image_path) : null,
-                    'popup_text' => $badge->popup_text_first,
-                    'count' => 1,
-                    'is_first' => true,
-                ];
-            } else {
-                $newCount = $existing->count + 1;
-
-                $user->badges()->updateExistingPivot($badge->id, [
-                    'count' => $newCount,
-                    'updated_at' => now(),
-                ]);
-
-                $badgePopups[] = [
-                    'title' => $badge->title,
-                    'image' => $badge->image_path ? Storage::url($badge->image_path) : null,
-                    'popup_text' => $badge->popup_text_repeat,
-                    'count' => $newCount,
-                    'is_first' => false,
-                ];
+            // Badge can only be earned once — skip if already owned
+            if ($existingBadges->has($badge->id)) {
+                continue;
             }
+
+            $toInsert[] = [
+                'badge_id' => $badge->id,
+                'user_id' => $user->id,
+                'count' => 1,
+                'collected_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            $badgePopups[] = [
+                'title' => $badge->title,
+                'image' => $badge->image_path ? Storage::url($badge->image_path) : null,
+                'popup_text' => $badge->popup_text_first,
+            ];
         }
 
         // Bulk insert new badge-user records
@@ -78,24 +62,6 @@ class BadgeScanService
         $this->revealLocations($user, $beacon);
 
         return $badgePopups;
-    }
-
-    /**
-     * Get location popup data for a duplicate beacon scan.
-     */
-    public function getDuplicateScanLocationPopup(Beacon $beacon): ?array
-    {
-        $location = $beacon->locations()->first();
-
-        if (!$location) {
-            return null;
-        }
-
-        return [
-            'title' => $location->title,
-            'description' => $location->description,
-            'image' => $location->image_path ? Storage::url($location->image_path) : null,
-        ];
     }
 
     /**

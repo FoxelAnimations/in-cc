@@ -67,9 +67,14 @@ class BeaconController extends Controller
         $isNewCollection = $this->collectForUser($user, $beacon);
 
         if ($user) {
-            // Eager-load relations for badge/location processing
-            $beacon->load(['badges' => fn ($q) => $q->active(), 'locations']);
-            $this->processBadgesAndLocations($user, $beacon, $isNewCollection);
+            if ($isNewCollection) {
+                $this->processBadgesAndLocations($user, $beacon);
+            } elseif ($beacon->locations()->exists()) {
+                // Repeat scan (beacon already collected) with linked location → redirect to map
+                $mapUrl = route('map');
+                $this->scanService->logScan($request, $guid, $beacon, $mapUrl, $isRateLimited);
+                return redirect($mapUrl);
+            }
         }
 
         $redirectUrl = $this->scanService->resolveRedirectUrl($beacon);
@@ -94,20 +99,12 @@ class BeaconController extends Controller
         return false;
     }
 
-    private function processBadgesAndLocations(User $user, Beacon $beacon, bool $isNewCollection): void
+    private function processBadgesAndLocations(User $user, Beacon $beacon): void
     {
-        if ($isNewCollection) {
-            $badgePopups = $this->badgeScanService->processNewBeaconScan($user, $beacon);
+        $badgePopups = $this->badgeScanService->processNewBeaconScan($user, $beacon);
 
-            if (!empty($badgePopups)) {
-                session()->flash('badge_popups', $badgePopups);
-            }
-        } else {
-            $locationPopup = $this->badgeScanService->getDuplicateScanLocationPopup($beacon);
-
-            if ($locationPopup) {
-                session()->flash('location_popup', $locationPopup);
-            }
+        if (!empty($badgePopups)) {
+            session()->flash('badge_popups', $badgePopups);
         }
     }
 }
