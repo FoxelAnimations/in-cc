@@ -6,6 +6,7 @@
         modalTab: 'video',
         charOpen: false,
         char: null,
+        epMuted: true,
         openEpisode(ep) {
             this.episode = ep;
             this.ageConfirmed = !ep.ageRestricted;
@@ -16,7 +17,7 @@
             // Track view
             fetch('/api/episodes/' + ep.id + '/view', {
                 method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content, 'Accept': 'application/json' },
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
             }).catch(() => {});
         },
         close() {
@@ -189,9 +190,26 @@
                                 <span class="hidden sm:inline-flex px-2 py-0.5 text-xs font-semibold uppercase tracking-wider bg-red-600 text-white shrink-0">YouTube</span>
                             </template>
                         </div>
-                        <button @click="close()" class="text-zinc-400 hover:text-white transition shrink-0 ml-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
+                        <div class="flex items-center gap-3 shrink-0 ml-2">
+                            {{-- Audio toggle (for uploaded videos) --}}
+                            <template x-if="episode && !episode.isYoutube && episode.videoUrl">
+                                <button @click="
+                                    const v = document.querySelector('#ep-video');
+                                    if (v) { v.muted = !v.muted; $data.epMuted = v.muted; }
+                                " class="text-zinc-400 hover:text-white transition" title="Audio aan/uit">
+                                    <svg x-show="!epMuted" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"/>
+                                    </svg>
+                                    <svg x-show="epMuted" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                                    </svg>
+                                </button>
+                            </template>
+                            <button @click="close()" class="text-zinc-400 hover:text-white transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -224,7 +242,7 @@
                             ></iframe>
                         </template>
                         <template x-if="episode && !episode.isYoutube && episode.videoUrl">
-                            <video controls autoplay class="w-full h-full" :src="episode.videoUrl"></video>
+                            <video id="ep-video" controls autoplay muted class="w-full h-full" :src="episode.videoUrl"></video>
                         </template>
                     </div>
                 </template>
