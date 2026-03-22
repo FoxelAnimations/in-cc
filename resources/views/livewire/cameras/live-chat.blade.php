@@ -16,9 +16,18 @@
          x-effect="if(autoScroll) $nextTick(() => { if($refs.chatScroll) $refs.chatScroll.scrollTop = $refs.chatScroll.scrollHeight })">
 
         @foreach ($this->messages as $msg)
-            <div class="text-sm leading-relaxed" wire:key="msg-{{ $msg->id }}">
-                <span class="font-semibold text-accent text-xs">{{ $msg->user->name }}</span>
-                <span class="text-white/80">{{ $msg->body }}</span>
+            <div class="text-sm leading-relaxed group flex items-start gap-1" wire:key="msg-{{ $msg->id }}">
+                <div class="flex-1 min-w-0">
+                    <span class="font-semibold text-accent text-xs">{{ $msg->user->name }}</span>
+                    <span class="text-white/80">{{ $msg->body }}</span>
+                </div>
+                @if (auth()->user()?->is_admin)
+                    <button wire:click="deleteMessage({{ $msg->id }})"
+                        class="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition shrink-0 mt-0.5"
+                        title="Verwijder">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                @endif
             </div>
         @endforeach
 
@@ -27,36 +36,8 @@
         @endif
     </div>
 
-    {{-- Input area --}}
-    @auth
-        <form wire:submit="sendMessage" class="px-3 py-2 border-t border-zinc-700/50 shrink-0"
-            x-data
-            @submit="$nextTick(() => $refs.chatInput.focus())">
-            <div class="flex gap-2">
-                <input type="text"
-                    wire:model="message"
-                    x-ref="chatInput"
-                    x-init="$el.focus()"
-                    maxlength="200"
-                    placeholder="Typ een bericht..."
-                    autocomplete="off"
-                    class="flex-1 bg-zinc-800 border border-zinc-700 text-white text-sm px-3 py-1.5 rounded-sm focus:border-accent focus:ring-accent"
-                >
-                <button type="submit"
-                    class="bg-accent text-black px-3 py-1.5 rounded-sm text-sm font-semibold uppercase tracking-wider hover:brightness-90 transition shrink-0"
-                    wire:loading.attr="disabled">
-                    Stuur
-                </button>
-            </div>
-            @error('message')
-                <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-            @enderror
-        </form>
-    @else
-        <div class="px-3 py-3 border-t border-zinc-700/50 text-center shrink-0">
-            <p class="text-zinc-500 text-xs">
-                <a href="{{ route('login') }}" class="text-accent hover:brightness-90 transition">Log in</a> om mee te chatten.
-            </p>
-        </div>
-    @endauth
+    {{-- Chat disabled --}}
+    <div class="px-3 py-3 border-t border-zinc-700/50 text-center shrink-0">
+        <p class="text-zinc-500 text-xs">Chat is momenteel uitgeschakeld.</p>
+    </div>
 </div>

@@ -103,6 +103,17 @@ class LiveChat extends Component
         $this->message = '';
     }
 
+    public function deleteMessage(int $messageId): void
+    {
+        if (!auth()->user()?->is_admin) {
+            return;
+        }
+
+        CameraLiveMessage::where('id', $messageId)
+            ->where('camera_id', $this->camera->id)
+            ->delete();
+    }
+
     private function pruneMessages(): void
     {
         $keepIds = CameraLiveMessage::where('camera_id', $this->camera->id)
