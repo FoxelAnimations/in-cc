@@ -98,7 +98,7 @@
                                 @endif
                             </div>
                             <p class="text-sm font-semibold text-white uppercase tracking-wider leading-tight">{{ $badge->title }}</p>
-                            <p class="text-[10px] text-zinc-500 mt-1">{{ $badge->pivot->collected_at->diffForHumans() }}</p>
+                            <p class="text-[10px] text-zinc-500 mt-1">{{ \Carbon\Carbon::parse($badge->pivot->collected_at)->diffForHumans() }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -128,7 +128,7 @@
                             @endif
                         </div>
                         <p class="text-sm font-semibold text-white uppercase tracking-wider leading-tight">{{ $beacon->title }}</p>
-                        <p class="text-[10px] text-zinc-500 mt-1">{{ $beacon->pivot->collected_at->diffForHumans() }}</p>
+                        <p class="text-[10px] text-zinc-500 mt-1">{{ \Carbon\Carbon::parse($beacon->pivot->collected_at)->diffForHumans() }}</p>
                     </div>
                 @endforeach
             </div>
