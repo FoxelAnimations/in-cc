@@ -55,11 +55,8 @@ class BeaconScanApiController extends Controller
             }
         }
 
-        // Process badges
-        $badgePopups = [];
-        if ($isNewCollection) {
-            $badgePopups = $this->badgeScanService->processNewBeaconScan($user, $beacon);
-        }
+        // Process badges (always — BadgeScanService skips already-earned badges)
+        $badgePopups = $this->badgeScanService->processNewBeaconScan($user, $beacon);
 
         return response()->json([
             'success' => true,

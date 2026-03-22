@@ -111,11 +111,10 @@
                 this.currentPopup = 0;
                 this.showingBadge = true;
                 this.result = null;
-            } else if (data.is_new) {
-                this.result = '{{ __('Beacon verzameld!') }}';
-                setTimeout(() => { this.result = null; this.startCamera(); }, 2000);
             } else {
-                this.result = '{{ __('Deze beacon heb je al gescand.') }}';
+                this.result = data.is_new
+                    ? '{{ __('Beacon verzameld!') }}'
+                    : '{{ __('Beacon gescand.') }}';
                 setTimeout(() => { this.result = null; this.startCamera(); }, 2000);
             }
         } catch (e) {
