@@ -115,7 +115,7 @@
                 this.result = data.is_new
                     ? '{{ __('Beacon verzameld!') }}'
                     : '{{ __('Beacon gescand.') }}';
-                setTimeout(() => { this.result = null; this.startCamera(); }, 2000);
+                setTimeout(() => { window.location.reload(); }, 1500);
             }
         } catch (e) {
             this.result = null;
@@ -128,9 +128,7 @@
         if (this.currentPopup < this.badgePopups.length - 1) {
             this.currentPopup++;
         } else {
-            this.showingBadge = false;
-            this.badgePopups = [];
-            this.startCamera();
+            window.location.reload();
         }
     }
 }" @open-scanner.window="openScanner()" @keydown.escape.window="if (show) closeScanner()"
@@ -182,7 +180,7 @@
 
             <button @click="nextBadge()"
                 class="px-6 py-2 text-sm font-semibold bg-accent text-black uppercase tracking-wider transition hover:brightness-90">
-                <span x-text="currentPopup < badgePopups.length - 1 ? '{{ __('Volgende') }}' : '{{ __('Verder scannen') }}'"></span>
+                <span x-text="currentPopup < badgePopups.length - 1 ? '{{ __('Volgende') }}' : '{{ __('Sluiten') }}'"></span>
             </button>
         </div>
     </div>
