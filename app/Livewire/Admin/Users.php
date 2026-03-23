@@ -10,10 +10,12 @@ use Livewire\Component;
 
 class Users extends Component
 {
+    public string $filterRole = '';
+    public string $search = '';
+
     public ?int $editingId = null;
     public string $editingName = '';
     public string $editingEmail = '';
-    public bool $editingIsAdmin = false;
 
     // Block modal
     public bool $showBlockModal = false;
@@ -32,18 +34,17 @@ class Users extends Component
     public string $newEmail = '';
     public string $newPassword = '';
     public string $newPasswordConfirmation = '';
-    public bool $newIsAdmin = false;
 
     public function openCreate(): void
     {
-        $this->reset(['newName', 'newEmail', 'newPassword', 'newPasswordConfirmation', 'newIsAdmin']);
+        $this->reset(['newName', 'newEmail', 'newPassword', 'newPasswordConfirmation']);
         $this->showCreateModal = true;
     }
 
     public function closeCreate(): void
     {
         $this->showCreateModal = false;
-        $this->reset(['newName', 'newEmail', 'newPassword', 'newPasswordConfirmation', 'newIsAdmin']);
+        $this->reset(['newName', 'newEmail', 'newPassword', 'newPasswordConfirmation']);
     }
 
     public function create(): void
@@ -59,7 +60,7 @@ class Users extends Component
             'name' => $this->newName,
             'email' => $this->newEmail,
             'password' => $this->newPassword,
-            'is_admin' => $this->newIsAdmin,
+            'is_admin' => false,
         ]);
 
         $this->closeCreate();
@@ -72,7 +73,6 @@ class Users extends Component
         $this->editingId = $user->id;
         $this->editingName = $user->name;
         $this->editingEmail = $user->email;
-        $this->editingIsAdmin = $user->is_admin;
     }
 
     public function update(): void
@@ -84,16 +84,10 @@ class Users extends Component
 
         $user = User::findOrFail($this->editingId);
 
-        $data = [
+        $user->update([
             'name' => $this->editingName,
             'email' => $this->editingEmail,
-        ];
-
-        if ($user->id !== Auth::id()) {
-            $data['is_admin'] = $this->editingIsAdmin;
-        }
-
-        $user->update($data);
+        ]);
 
         $this->cancelEdit();
         session()->flash('status', 'User updated successfully.');
@@ -101,22 +95,7 @@ class Users extends Component
 
     public function cancelEdit(): void
     {
-        $this->reset(['editingId', 'editingName', 'editingEmail', 'editingIsAdmin']);
-    }
-
-    public function toggleAdmin(int $id): void
-    {
-        $user = User::findOrFail($id);
-
-        if ($user->id === Auth::id()) {
-            session()->flash('status', 'You cannot change your own admin status.');
-            return;
-        }
-
-        $user->update(['is_admin' => !$user->is_admin]);
-
-        $status = $user->is_admin ? 'User promoted to admin.' : 'Admin rights removed.';
-        session()->flash('status', $status);
+        $this->reset(['editingId', 'editingName', 'editingEmail']);
     }
 
     public function openBlockModal(int $userId, string $type = 'account'): void
@@ -277,8 +256,23 @@ class Users extends Component
 
     public function render()
     {
+        $query = User::orderBy('name');
+
+        if ($this->filterRole === 'admin') {
+            $query->where('is_admin', true);
+        } elseif ($this->filterRole === 'user') {
+            $query->where('is_admin', false);
+        }
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', "%{$this->search}%")
+                  ->orWhere('email', 'like', "%{$this->search}%");
+            });
+        }
+
         $data = [
-            'users' => User::orderBy('name')->get(),
+            'users' => $query->get(),
         ];
 
         if ($this->showBadgeModal && $this->badgeUserId) {

@@ -85,7 +85,7 @@
                     <div class="bg-zinc-800/50 border border-zinc-700/30 rounded-sm p-4" wire:key="comment-{{ $comment->id }}">
                         <div class="flex items-start justify-between gap-2">
                             <div>
-                                <span class="text-sm font-semibold text-white">{{ $comment->user->name }}</span>
+                                <button type="button" x-data @click="$dispatch('show-user-profile', { userId: {{ $comment->user->id }} })" class="text-sm font-semibold text-white hover:underline cursor-pointer">{{ $comment->user->name }}</button>
                                 <span class="text-xs text-zinc-500 ml-2">{{ $comment->created_at->diffForHumans() }}</span>
                             </div>
                             @if (auth()->user()?->is_admin)

@@ -18,7 +18,7 @@
         @foreach ($this->messages as $msg)
             <div class="text-sm leading-relaxed group flex items-start gap-1" wire:key="msg-{{ $msg->id }}">
                 <div class="flex-1 min-w-0">
-                    <span class="font-semibold text-accent text-xs">{{ $msg->user->name }}</span>
+                    <button type="button" x-data @click="$dispatch('show-user-profile', { userId: {{ $msg->user->id }} })" class="font-semibold text-accent text-xs hover:underline cursor-pointer">{{ $msg->user->name }}</button>
                     <span class="text-white/80">{{ $msg->body }}</span>
                 </div>
                 @if (auth()->user()?->is_admin)

@@ -18,11 +18,20 @@
             </div>
         @endif
 
+        {{-- Filters --}}
+        <div class="flex flex-wrap gap-3 mb-6">
+            <input type="text" wire:model.live.debounce.300ms="search"
+                class="bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm w-64"
+                placeholder="{{ __('Search users...') }}">
+            <select wire:model.live="filterRole"
+                class="bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm">
+                <option value="">{{ __('All Roles') }}</option>
+                <option value="admin">{{ __('Admin') }}</option>
+                <option value="user">{{ __('User') }}</option>
+            </select>
+        </div>
+
         <div class="rounded-sm bg-zinc-900 border border-zinc-800 overflow-hidden">
-            <div class="px-4 py-4 border-b border-zinc-800">
-                <p class="text-xs uppercase tracking-[0.3em] text-zinc-500">Management</p>
-                <h2 class="text-lg font-semibold uppercase tracking-wider">{{ __('All Users') }}</h2>
-            </div>
 
             @if($users->isEmpty())
                 <div class="p-8 text-center text-zinc-600">{{ __('No users found.') }}</div>
@@ -52,12 +61,6 @@
                                                     <input type="email" wire:model="editingEmail" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-1.5 text-sm focus:border-accent focus:ring-accent rounded-sm" placeholder="{{ __('Email') }}">
                                                     @error('editingEmail') <span class="text-red-400 text-xs">{{ $message }}</span> @enderror
                                                 </div>
-                                                @if($user->id !== auth()->id())
-                                                    <label class="flex items-center gap-2 shrink-0 cursor-pointer">
-                                                        <input type="checkbox" wire:model="editingIsAdmin" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
-                                                        <span class="text-xs font-semibold text-zinc-300">{{ __('Admin') }}</span>
-                                                    </label>
-                                                @endif
                                                 <div class="flex gap-2 shrink-0">
                                                     <button type="submit" class="inline-flex items-center bg-accent text-black px-3 py-1.5 text-xs font-semibold tracking-wider uppercase transition hover:brightness-90">{{ __('Save') }}</button>
                                                     <button type="button" wire:click="cancelEdit" class="inline-flex items-center border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white transition">{{ __('Cancel') }}</button>
@@ -99,14 +102,6 @@
                                             </button>
 
                                             @if($user->id !== auth()->id())
-                                                <button
-                                                    wire:click="toggleAdmin({{ $user->id }})"
-                                                    wire:confirm="{{ $user->is_admin ? __('Are you sure you want to remove admin rights from this user?') : __('Are you sure you want to make this user an admin?') }}"
-                                                    class="inline-flex items-center border {{ $user->is_admin ? 'border-accent/50 text-accent hover:bg-accent/10' : 'border-blue-900 text-blue-400 hover:bg-blue-900/30' }} px-3 py-1.5 text-xs font-semibold transition"
-                                                >
-                                                    {{ $user->is_admin ? __('Remove Admin') : __('Make Admin') }}
-                                                </button>
-
                                                 @if($user->isAccountBlocked())
                                                     <button
                                                         wire:click="unblockAccount({{ $user->id }})"
@@ -203,11 +198,6 @@
                             <label class="block text-sm font-medium text-zinc-400 mb-1">{{ __('Confirm Password') }} *</label>
                             <input type="password" wire:model="newPasswordConfirmation" class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm">
                         </div>
-
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" wire:model="newIsAdmin" class="rounded-sm border-zinc-600 bg-zinc-800 text-accent focus:ring-accent">
-                            <span class="text-sm font-medium text-white">{{ __('Admin') }}</span>
-                        </label>
 
                         <div class="flex items-center gap-3 pt-2">
                             <button type="submit" class="inline-flex items-center bg-accent text-black px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90">

@@ -111,6 +111,9 @@
                 this.currentPopup = 0;
                 this.showingBadge = true;
                 this.result = null;
+                if (window.confetti) {
+                    window.confetti({ particleCount: 60, spread: 55, origin: { y: 0.6 }, disableForReducedMotion: true });
+                }
             } else {
                 this.result = data.is_new
                     ? '{{ __('Beacon verzameld!') }}'

@@ -20,7 +20,7 @@
                 @error('userName') <p class="mt-1 text-sm text-red-400">{{ $message }}</p> @enderror
             @else
                 <h1 class="text-3xl font-bold uppercase tracking-wider flex items-center gap-3">
-                    {{ auth()->user()->name }}
+                    <button type="button" x-data @click="$dispatch('show-user-profile', { userId: {{ auth()->id() }} })" class="hover:text-accent transition cursor-pointer">{{ auth()->user()->name }}</button>
                     <button wire:click="startEditingName" class="text-accent text-xs uppercase tracking-wider hover:brightness-90 transition">
                         {{ __('Bewerken') }}
                     </button>
@@ -54,7 +54,9 @@
         @endif
 
         {{-- Earned Badges (new Badge model) --}}
-        <div class="border border-zinc-800 bg-zinc-900 rounded-sm p-8 mb-10">
+        <div class="border border-zinc-800 bg-zinc-900 rounded-sm p-8 mb-10"
+            x-data="{ badgeDetail: null }"
+            @badge-detail.window="badgeDetail = $event.detail">
             <div class="mb-6">
                 <div class="flex items-start justify-between gap-4">
                     <div>
@@ -85,7 +87,13 @@
             @else
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                     @foreach ($earnedBadges as $badge)
-                        <div class="group text-center {{ !$badge->is_active ? 'opacity-50 grayscale' : '' }}">
+                        <button type="button"
+                            @click="$dispatch('badge-detail', {
+                                title: {{ Js::from($badge->title) }},
+                                image: {{ Js::from($badge->image_path ? Storage::url($badge->image_path) : null) }},
+                                description: {{ Js::from($badge->description) }}
+                            })"
+                            class="group text-center {{ !$badge->is_active ? 'opacity-50 grayscale' : '' }} cursor-pointer">
                             <div class="relative mx-auto w-28 h-28 mb-3">
                                 @if ($badge->image_path)
                                     <img src="{{ Storage::url($badge->image_path) }}"
@@ -99,10 +107,31 @@
                             </div>
                             <p class="text-sm font-semibold text-white uppercase tracking-wider leading-tight">{{ $badge->title }}</p>
                             <p class="text-[10px] text-zinc-500 mt-1">{{ \Carbon\Carbon::parse($badge->pivot->collected_at)->diffForHumans() }}</p>
-                        </div>
+                        </button>
                     @endforeach
                 </div>
             @endif
+
+            {{-- Badge Detail Popup --}}
+            <div x-show="badgeDetail" x-transition.opacity x-cloak
+                class="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 p-4"
+                @click.self="badgeDetail = null"
+                @keydown.escape.window="badgeDetail = null">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-sm w-full max-w-sm text-center overflow-hidden" @click.stop>
+                    <div class="p-6">
+                        <template x-if="badgeDetail?.image">
+                            <img :src="badgeDetail.image" :alt="badgeDetail.title"
+                                class="w-28 h-28 mx-auto mb-4 object-contain rounded-full border-2 border-accent/30 bg-zinc-800 p-1">
+                        </template>
+                        <h3 class="text-xl font-bold uppercase tracking-wider text-white mb-3" x-text="badgeDetail?.title"></h3>
+                        <p class="text-sm text-zinc-400 mb-4" x-text="badgeDetail?.description"></p>
+                        <button @click="badgeDetail = null"
+                            class="px-6 py-2 text-sm font-semibold bg-accent text-black uppercase tracking-wider transition hover:brightness-90">
+                            {{ __('Sluiten') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- Collected Beacons (legacy) --}}

@@ -59,6 +59,7 @@
 
         @auth
             <x-qr-scanner-modal mode="api" reader-id="user-qr-reader" />
+            @livewire('user-profile-popup')
         @endauth
 
         @livewireScripts
