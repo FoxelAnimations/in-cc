@@ -8,6 +8,9 @@
         <div class="mb-6">
             <p class="text-sm tracking-[0.3em] uppercase text-zinc-500 mb-1">{{ __('Ontdek') }}</p>
             <h1 class="text-3xl font-bold uppercase tracking-wider">{{ __('De Kaart') }}</h1>
+            @if ($mapDescription)
+                <p class="mt-2 text-zinc-400 text-sm font-description">{{ $mapDescription }}</p>
+            @endif
         </div>
 
         {{-- Filters --}}

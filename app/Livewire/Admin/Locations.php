@@ -20,6 +20,7 @@ class Locations extends Component
 
     // Settings
     public bool $showMap = false;
+    public string $mapDescription = '';
 
     // Filters
     public string $filterCategory = '';
@@ -60,12 +61,14 @@ class Locations extends Component
     {
         $settings = SiteSetting::first();
         $this->showMap = $settings?->show_map ?? false;
+        $this->mapDescription = $settings?->map_description ?? '';
     }
 
     public function saveSettings(): void
     {
         SiteSetting::first()?->update([
             'show_map' => $this->showMap,
+            'map_description' => $this->mapDescription ?: null,
         ]);
 
         session()->flash('status', 'Settings updated.');

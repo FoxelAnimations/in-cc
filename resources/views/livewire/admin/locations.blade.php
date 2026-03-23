@@ -49,6 +49,13 @@
                     </label>
                     <p class="text-xs text-zinc-500 ml-8">Shows the map page link in the navigation. When disabled, only admins can access the map.</p>
 
+                    <div class="border-t border-zinc-800 pt-4">
+                        <label class="block text-sm font-medium text-zinc-400 mb-1">Map Description</label>
+                        <textarea wire:model="mapDescription" rows="3"
+                            class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm"
+                            placeholder="Description shown above the map on the public page"></textarea>
+                    </div>
+
                     <button wire:click="saveSettings"
                         class="inline-flex items-center bg-accent text-black px-4 py-2 text-sm font-semibold tracking-wider uppercase transition hover:brightness-90">
                         Save Settings

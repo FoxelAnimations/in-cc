@@ -94,6 +94,7 @@ class MapPage extends Component
         return view('livewire.map-page', [
             'categories' => LocationCategory::orderBy('name')->get(),
             'isLoggedIn' => Auth::check(),
+            'mapDescription' => SiteSetting::first()?->map_description,
         ])->layoutData(['bgClass' => 'bg-black']);
     }
 }

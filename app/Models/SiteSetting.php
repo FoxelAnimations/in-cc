@@ -33,6 +33,7 @@ class SiteSetting extends Model
         'dashboard_news_items',
         'dashboard_news_updated_at',
         'show_map',
+        'map_description',
         'badge_section_label',
         'badge_section_title',
         'badge_section_text',
