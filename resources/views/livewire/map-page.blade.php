@@ -70,7 +70,7 @@
                 </template>
 
                 <template x-if="location?.description">
-                    <div class="text-sm text-zinc-400 prose prose-invert prose-sm max-w-none mb-4" x-html="location.description"></div>
+                    <div class="text-sm text-zinc-400 prose prose-invert prose-sm max-w-none mb-4 font-description" x-html="location.description"></div>
                 </template>
 
                 {{-- Buttons --}}
