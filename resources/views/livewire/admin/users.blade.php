@@ -94,6 +94,9 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                            <button wire:click="openLocations({{ $user->id }})" class="inline-flex items-center border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:border-accent hover:text-accent transition">
+                                                {{ __('Locations') }}
+                                            </button>
                                             <button wire:click="openBadges({{ $user->id }})" class="inline-flex items-center border border-zinc-700 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:border-accent hover:text-accent transition">
                                                 {{ __('Badges') }}
                                             </button>
@@ -271,6 +274,70 @@
                             </button>
                         </div>
                         @error('assignBadgeId') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Location Management Modal --}}
+    @if ($showLocationModal && isset($locationUser))
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 md:p-8 overflow-y-auto"
+            x-data
+            @keydown.escape.window="$wire.closeLocations()"
+        >
+            <div class="absolute inset-0" wire:click="closeLocations"></div>
+
+            <div class="relative bg-zinc-900 border border-zinc-800 w-full max-w-lg my-8" @click.stop>
+                <div class="sticky top-0 z-10 bg-zinc-800 text-accent px-5 py-3 text-sm font-semibold uppercase tracking-wider flex items-center justify-between">
+                    <span>Locations — {{ $locationUser->name }}</span>
+                    <button wire:click="closeLocations" class="text-zinc-400 hover:text-white transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-5 space-y-4">
+                    {{-- Current locations --}}
+                    @if (isset($userLocations) && $userLocations->isNotEmpty())
+                        <div class="space-y-2">
+                            <h3 class="text-xs uppercase tracking-wider text-zinc-500">Current Locations</h3>
+                            @foreach ($userLocations as $ul)
+                                <div class="flex items-center gap-3 bg-zinc-800 rounded-sm p-3">
+                                    @if ($ul->image_path)
+                                        <img src="{{ Storage::url($ul->image_path) }}" class="w-8 h-8 rounded object-cover flex-shrink-0">
+                                    @endif
+                                    <span class="text-sm text-white font-medium flex-1">{{ $ul->title }}</span>
+                                    <button wire:click="removeLocation({{ $ul->id }})"
+                                        wire:confirm="Remove this location from user?"
+                                        class="text-red-400 hover:text-red-300 transition text-xs font-semibold uppercase">
+                                        Remove
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-zinc-600">No locations revealed yet.</p>
+                    @endif
+
+                    {{-- Assign new location --}}
+                    <div class="border-t border-zinc-800 pt-4">
+                        <h3 class="text-xs uppercase tracking-wider text-zinc-500 mb-2">Assign Location</h3>
+                        <div class="flex items-end gap-2">
+                            <div class="flex-1">
+                                <select wire:model="assignLocationId"
+                                    class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm">
+                                    <option value="">Select location...</option>
+                                    @foreach ($allLocations as $location)
+                                        <option value="{{ $location->id }}">{{ $location->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <button wire:click="assignLocation"
+                                class="px-4 py-2 text-sm font-semibold bg-accent text-black uppercase tracking-wider transition hover:brightness-90">
+                                Assign
+                            </button>
+                        </div>
+                        @error('assignLocationId') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
                 </div>
             </div>

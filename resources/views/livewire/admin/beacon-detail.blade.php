@@ -209,11 +209,61 @@
                     </div>
 
                     @if ($beacon->latitude && $beacon->longitude)
-                        <a href="{{ $beacon->google_maps_url }}" target="_blank" rel="noopener"
-                            class="inline-flex items-center gap-2 text-sm text-accent hover:underline">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Open in Google Maps
-                        </a>
+                        {{-- Leaflet pin map --}}
+                        <div class="w-full h-48 rounded-sm border border-zinc-700 bg-zinc-800 overflow-hidden"
+                            wire:ignore
+                            x-data="{
+                                map: null,
+                                init() {
+                                    if (typeof L === 'undefined') return;
+                                    this.waitForVisible();
+                                },
+                                waitForVisible() {
+                                    const el = this.$el;
+                                    const check = () => {
+                                        if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+                                            this.initMap();
+                                        } else {
+                                            requestAnimationFrame(check);
+                                        }
+                                    };
+                                    requestAnimationFrame(check);
+                                },
+                                initMap() {
+                                    if (this.map) return;
+                                    const lat = {{ $beacon->latitude }};
+                                    const lng = {{ $beacon->longitude }};
+                                    this.map = L.map(this.$el, {
+                                        zoomControl: false,
+                                        attributionControl: false
+                                    }).setView([lat, lng], 15);
+
+                                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                                        subdomains: 'abcd',
+                                        maxZoom: 19,
+                                        className: 'beacon-map-tiles'
+                                    }).addTo(this.map);
+
+                                    L.marker([lat, lng]).addTo(this.map);
+                                    this.$nextTick(() => this.map.invalidateSize());
+                                }
+                            }">
+                        </div>
+                        <style>.beacon-map-tiles { filter: grayscale(100%) brightness(0.85) contrast(1.1) !important; }</style>
+
+                        {{-- Map links --}}
+                        <div class="flex items-center gap-4">
+                            <a href="{{ $beacon->google_maps_url }}" target="_blank" rel="noopener"
+                                class="inline-flex items-center gap-2 text-sm text-accent hover:underline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                Open in Google Maps
+                            </a>
+                            <a href="https://www.google.com/maps?layer=c&cbll={{ $beacon->latitude }},{{ $beacon->longitude }}" target="_blank" rel="noopener"
+                                class="inline-flex items-center gap-2 text-sm text-accent hover:underline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                Street View
+                            </a>
+                        </div>
                     @endif
                 </div>
 
@@ -388,34 +438,44 @@
                             <table class="min-w-full divide-y divide-zinc-800">
                                 <thead>
                                     <tr class="text-xs uppercase tracking-wider text-zinc-500">
+                                        <th class="px-4 py-3 text-left w-6"></th>
                                         <th class="px-4 py-3 text-left">Timestamp</th>
-                                        <th class="px-4 py-3 text-left">Hashed IP</th>
-                                        <th class="px-4 py-3 text-left">User Agent</th>
-                                        <th class="px-4 py-3 text-left">Referrer</th>
-                                        <th class="px-4 py-3 text-left">Redirect</th>
-                                        <th class="px-4 py-3 text-left">Location</th>
+                                        <th class="px-4 py-3 text-left">Source</th>
+                                        <th class="px-4 py-3 text-left">Device</th>
                                         <th class="px-4 py-3 text-center">Type</th>
                                         <th class="px-4 py-3 text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-zinc-800">
+                                <tbody class="divide-y divide-zinc-800" x-data="{ expanded: null }">
                                     @foreach ($scans as $scan)
-                                        <tr class="hover:bg-zinc-800/50 transition text-sm">
+                                        <tr @click="expanded = expanded === {{ $scan->id }} ? null : {{ $scan->id }}"
+                                            class="hover:bg-zinc-800/50 transition text-sm cursor-pointer"
+                                            :class="expanded === {{ $scan->id }} && 'bg-zinc-800/50'">
+                                            <td class="px-4 py-3 text-zinc-500">
+                                                <svg class="w-4 h-4 transition-transform" :class="expanded === {{ $scan->id }} && 'rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                            </td>
                                             <td class="px-4 py-3 text-zinc-300 whitespace-nowrap">{{ $scan->scanned_at->format('Y-m-d H:i:s') }}</td>
-                                            <td class="px-4 py-3"><code class="text-xs text-zinc-500 font-mono">{{ $scan->short_hashed_ip }}</code></td>
-                                            <td class="px-4 py-3 text-zinc-400 max-w-[200px] truncate" title="{{ $scan->user_agent }}">{{ Str::limit($scan->user_agent, 40) }}</td>
-                                            <td class="px-4 py-3 text-zinc-400 max-w-[150px] truncate" title="{{ $scan->referrer }}">{{ $scan->referrer ?: '—' }}</td>
-                                            <td class="px-4 py-3 text-zinc-400 max-w-[150px] truncate" title="{{ $scan->redirect_url_used }}">{{ $scan->redirect_url_used }}</td>
-                                            <td class="px-4 py-3 text-zinc-400 whitespace-nowrap">
-                                                @if ($scan->recorded_location)
-                                                    @if ($scan->recorded_location_map_url)
-                                                        <a href="{{ $scan->recorded_location_map_url }}" target="_blank" class="hover:text-accent transition" title="Open in Maps">{{ $scan->recorded_location }}</a>
-                                                    @else
-                                                        {{ $scan->recorded_location }}
-                                                    @endif
+                                            <td class="px-4 py-3 text-zinc-400">
+                                                @if ($scan->referrer && str_contains($scan->referrer, '/admin'))
+                                                    <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-sm bg-purple-900/30 text-purple-400 border border-purple-800">Admin Scan</span>
+                                                @elseif ($scan->referrer)
+                                                    <span class="max-w-[150px] truncate block" title="{{ $scan->referrer }}">{{ $scan->referrer }}</span>
                                                 @else
-                                                    —
+                                                    <span class="text-zinc-600">Direct</span>
                                                 @endif
+                                            </td>
+                                            <td class="px-4 py-3 text-zinc-400">
+                                                @php $deviceType = $scan->device_type; @endphp
+                                                <span class="inline-flex items-center gap-1 text-xs">
+                                                    @if ($deviceType === 'mobile')
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                    @elseif ($deviceType === 'tablet')
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                    @else
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                    @endif
+                                                    {{ ucfirst($deviceType) }}
+                                                </span>
                                             </td>
                                             <td class="px-4 py-3 text-center">
                                                 <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-sm {{ $scan->is_known ? 'bg-green-900/30 text-green-400 border border-green-800' : 'bg-zinc-800 text-zinc-500 border border-zinc-700' }}">
@@ -427,12 +487,84 @@
                                                     </span>
                                                 @endif
                                             </td>
-                                            <td class="px-4 py-3 text-right">
+                                            <td class="px-4 py-3 text-right" @click.stop>
                                                 <button wire:click="deleteScan({{ $scan->id }})"
                                                     wire:confirm="Delete this scan log entry?"
                                                     class="inline-flex items-center px-2 py-1 text-xs font-semibold bg-red-900/30 text-red-400 border border-red-800 rounded-sm transition hover:bg-red-900/50">
                                                     Delete
                                                 </button>
+                                            </td>
+                                        </tr>
+                                        {{-- Expanded details row --}}
+                                        <tr x-show="expanded === {{ $scan->id }}" x-collapse x-cloak>
+                                            <td colspan="6" class="px-4 py-0">
+                                                <div class="py-4 pl-10 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm border-l-2 border-accent/30 ml-1">
+                                                    <div>
+                                                        <span class="text-xs uppercase tracking-wider text-zinc-500 block mb-0.5">Hashed IP</span>
+                                                        <code class="text-xs text-zinc-400 font-mono">{{ $scan->hashed_ip }}</code>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-xs uppercase tracking-wider text-zinc-500 block mb-0.5">User Agent</span>
+                                                        <span class="text-zinc-400 text-xs break-all">{{ $scan->user_agent ?: '—' }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-xs uppercase tracking-wider text-zinc-500 block mb-0.5">Source</span>
+                                                        @if ($scan->referrer && str_contains($scan->referrer, '/admin'))
+                                                            <span class="text-purple-400 text-xs">Admin Scan</span>
+                                                            <span class="text-zinc-600 text-xs block">{{ $scan->referrer }}</span>
+                                                        @else
+                                                            <span class="text-zinc-400 text-xs break-all">{{ $scan->referrer ?: 'Direct (no referrer)' }}</span>
+                                                        @endif
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-xs uppercase tracking-wider text-zinc-500 block mb-0.5">Requested URL</span>
+                                                        <span class="text-zinc-400 text-xs break-all">{{ $scan->requested_url ?: '—' }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-xs uppercase tracking-wider text-zinc-500 block mb-0.5">Redirect Used</span>
+                                                        <span class="text-zinc-400 text-xs break-all">{{ $scan->redirect_url_used ?: '—' }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-xs uppercase tracking-wider text-zinc-500 block mb-0.5">Location</span>
+                                                        @if ($scan->recorded_location)
+                                                            @if ($scan->recorded_location_map_url)
+                                                                <a href="{{ $scan->recorded_location_map_url }}" target="_blank" class="text-accent hover:underline text-xs">{{ $scan->recorded_location }}</a>
+                                                            @else
+                                                                <span class="text-zinc-400 text-xs">{{ $scan->recorded_location }}</span>
+                                                            @endif
+                                                        @else
+                                                            <span class="text-zinc-600 text-xs">—</span>
+                                                        @endif
+                                                    </div>
+                                                    @if ($scan->utm_source || $scan->utm_medium || $scan->utm_campaign)
+                                                        <div class="md:col-span-2">
+                                                            <span class="text-xs uppercase tracking-wider text-zinc-500 block mb-0.5">UTM Parameters</span>
+                                                            <div class="flex flex-wrap gap-2">
+                                                                @if ($scan->utm_source)
+                                                                    <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-sm bg-zinc-800 text-zinc-400 border border-zinc-700">source: {{ $scan->utm_source }}</span>
+                                                                @endif
+                                                                @if ($scan->utm_medium)
+                                                                    <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-sm bg-zinc-800 text-zinc-400 border border-zinc-700">medium: {{ $scan->utm_medium }}</span>
+                                                                @endif
+                                                                @if ($scan->utm_campaign)
+                                                                    <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-sm bg-zinc-800 text-zinc-400 border border-zinc-700">campaign: {{ $scan->utm_campaign }}</span>
+                                                                @endif
+                                                                @if ($scan->utm_term)
+                                                                    <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-sm bg-zinc-800 text-zinc-400 border border-zinc-700">term: {{ $scan->utm_term }}</span>
+                                                                @endif
+                                                                @if ($scan->utm_content)
+                                                                    <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-sm bg-zinc-800 text-zinc-400 border border-zinc-700">content: {{ $scan->utm_content }}</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                    @if ($scan->meta_json)
+                                                        <div class="md:col-span-2">
+                                                            <span class="text-xs uppercase tracking-wider text-zinc-500 block mb-0.5">Extra Query Params</span>
+                                                            <code class="text-xs text-zinc-400 font-mono break-all">{{ json_encode($scan->meta_json) }}</code>
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

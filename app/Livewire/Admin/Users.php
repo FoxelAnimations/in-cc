@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Badge;
+use App\Models\Location;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,11 @@ class Users extends Component
     public bool $showBadgeModal = false;
     public ?int $badgeUserId = null;
     public ?int $assignBadgeId = null;
+
+    // Location management modal
+    public bool $showLocationModal = false;
+    public ?int $locationUserId = null;
+    public ?int $assignLocationId = null;
 
     public bool $showCreateModal = false;
     public string $newName = '';
@@ -254,6 +260,58 @@ class Users extends Component
         session()->flash('status', 'Badge removed from user.');
     }
 
+    public function openLocations(int $id): void
+    {
+        $this->locationUserId = $id;
+        $this->assignLocationId = null;
+        $this->showLocationModal = true;
+    }
+
+    public function closeLocations(): void
+    {
+        $this->showLocationModal = false;
+        $this->reset(['locationUserId', 'assignLocationId']);
+    }
+
+    public function assignLocation(): void
+    {
+        $this->validate([
+            'assignLocationId' => ['required', 'exists:locations,id'],
+        ]);
+
+        $user = User::findOrFail($this->locationUserId);
+
+        $exists = DB::table('location_user')
+            ->where('location_id', $this->assignLocationId)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if ($exists) {
+            session()->flash('status', 'User already has this location.');
+            $this->assignLocationId = null;
+            return;
+        }
+
+        DB::table('location_user')->insert([
+            'location_id' => $this->assignLocationId,
+            'user_id' => $user->id,
+            'revealed_at' => now(),
+        ]);
+
+        $this->assignLocationId = null;
+        session()->flash('status', 'Location assigned.');
+    }
+
+    public function removeLocation(int $locationId): void
+    {
+        DB::table('location_user')
+            ->where('location_id', $locationId)
+            ->where('user_id', $this->locationUserId)
+            ->delete();
+
+        session()->flash('status', 'Location removed from user.');
+    }
+
     public function render()
     {
         $query = User::orderBy('name');
@@ -284,6 +342,16 @@ class Users extends Component
                 ->select('badges.id', 'badges.title', 'badges.image_path', 'badge_user.count', 'badge_user.collected_at')
                 ->get();
             $data['allBadges'] = Badge::orderBy('title')->get();
+        }
+
+        if ($this->showLocationModal && $this->locationUserId) {
+            $data['locationUser'] = User::find($this->locationUserId);
+            $data['userLocations'] = DB::table('location_user')
+                ->join('locations', 'locations.id', '=', 'location_user.location_id')
+                ->where('location_user.user_id', $this->locationUserId)
+                ->select('locations.id', 'locations.title', 'locations.image_path', 'location_user.revealed_at')
+                ->get();
+            $data['allLocations'] = Location::where('is_active', true)->orderBy('title')->get();
         }
 
         return view('livewire.admin.users', $data)->layout('layouts.admin');
