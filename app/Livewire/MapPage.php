@@ -50,7 +50,7 @@ class MapPage extends Component
 
     public function loadLocations(): void
     {
-        $query = Location::active()->with('categories');
+        $query = Location::active()->with(['categories', 'beacons']);
 
         if ($this->filterCategory) {
             $query->whereHas('categories', fn ($q) => $q->where('location_categories.id', $this->filterCategory));
@@ -85,6 +85,8 @@ class MapPage extends Component
                 'is_hidden' => $isHidden,
                 'is_revealed' => $isRevealed,
                 'is_scanned' => $isRevealed,
+                'color' => $location->categories->first()?->color,
+                'has_beacon' => $location->beacons->isNotEmpty(),
             ];
         })->toArray();
     }

@@ -162,7 +162,7 @@
                     locations.forEach(loc => {
                         const isHiddenUnrevealed = loc.is_hidden && !loc.is_revealed;
                         const hasCheckmark = loc.is_scanned;
-                        const icon = this.createMarkerIcon(isHiddenUnrevealed ? '?' : 'pin', hasCheckmark);
+                        const icon = this.createMarkerIcon(isHiddenUnrevealed ? '?' : 'pin', hasCheckmark, loc.color, loc.has_beacon);
 
                         const marker = L.marker([loc.lat, loc.lng], { icon }).addTo(this.map);
                         bounds.push([loc.lat, loc.lng]);
@@ -178,14 +178,21 @@
                     }
                 },
 
-                createMarkerIcon(symbol, hasCheckmark) {
-                    const c = this.accentColor;
+                createMarkerIcon(symbol, hasCheckmark, color, hasBeacon) {
+                    const c = color || this.accentColor;
 
                     // Chunky rounded checkmark badge
                     const checkSvg = hasCheckmark
                         ? `<circle cx="32" cy="9" r="9" fill="${c}" stroke="#18181b" stroke-width="2.5"/>
                            <path d="M28 9 L31 12 L37 6" fill="none" stroke="#18181b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
                         : '';
+
+                    // Inner shape: star for beacon-linked, circle for default
+                    const innerShape = hasBeacon
+                        ? `<circle cx="21" cy="18" r="7" fill="#18181b" opacity="0.2"/>
+                           <polygon points="21,12 23,16.5 28,17 24.5,20.5 25.5,25 21,22.5 16.5,25 17.5,20.5 14,17 19,16.5" fill="#fff"/>`
+                        : `<circle cx="21" cy="18" r="7" fill="#18181b" opacity="0.2"/>
+                           <circle cx="21" cy="18" r="5" fill="#fff"/>`;
 
                     // Bigger, rounder, bolder — friendly cartoon pin
                     const svg = symbol === '?'
@@ -197,8 +204,7 @@
                            </svg>`
                         : `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="52" viewBox="0 0 42 52">
                             <path d="M21 49 C21 49 3 30 3 18 C3 8.6 11.06 1 21 1 S39 8.6 39 18 C39 30 21 49 21 49Z" fill="${c}" stroke="#18181b" stroke-width="3" stroke-linejoin="round"/>
-                            <circle cx="21" cy="18" r="7" fill="#18181b" opacity="0.2"/>
-                            <circle cx="21" cy="18" r="5" fill="#fff"/>
+                            ${innerShape}
                             ${checkSvg}
                            </svg>`;
 

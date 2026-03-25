@@ -11,6 +11,7 @@ class LocationCategory extends Model
     protected $fillable = [
         'name',
         'slug',
+        'color',
         'sort_order',
     ];
 

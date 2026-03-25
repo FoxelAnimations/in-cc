@@ -37,6 +37,7 @@
                 <table class="min-w-full divide-y divide-zinc-800">
                     <thead>
                         <tr class="text-xs uppercase tracking-wider text-zinc-500">
+                            <th class="px-4 py-3 text-left">Color</th>
                             <th class="px-4 py-3 text-left">Name</th>
                             <th class="px-4 py-3 text-left">Slug</th>
                             <th class="px-4 py-3 text-center">Locations</th>
@@ -46,6 +47,13 @@
                     <tbody class="divide-y divide-zinc-800">
                         @foreach ($categories as $category)
                             <tr class="hover:bg-zinc-800/50 transition">
+                                <td class="px-4 py-4">
+                                    @if ($category->color)
+                                        <span class="inline-block w-5 h-5 rounded-full border border-zinc-700" style="background-color: {{ $category->color }}"></span>
+                                    @else
+                                        <span class="text-xs text-zinc-600">Default</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-4 text-white font-medium">{{ $category->name }}</td>
                                 <td class="px-4 py-4"><code class="text-xs text-zinc-500 font-mono">{{ $category->slug }}</code></td>
                                 <td class="px-4 py-4 text-center text-zinc-400 text-sm">{{ $category->locations_count }}</td>
@@ -94,6 +102,22 @@
                                 class="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 text-sm focus:border-accent focus:ring-accent rounded-sm"
                                 placeholder="e.g. Restaurant, Park, Landmark">
                             @error('name') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-zinc-400 mb-1">Pin Color</label>
+                            <div class="flex items-center gap-3">
+                                <input type="color" wire:model.live="color"
+                                    value="{{ $color ?: '#E7FF57' }}"
+                                    class="w-10 h-10 rounded-sm border border-zinc-700 bg-zinc-800 cursor-pointer p-0.5">
+                                @if ($color)
+                                    <button type="button" wire:click="$set('color', '')"
+                                        class="text-xs text-zinc-500 hover:text-zinc-300 transition">Reset to default</button>
+                                @else
+                                    <span class="text-xs text-zinc-600">Using default accent color</span>
+                                @endif
+                            </div>
+                            @error('color') <span class="text-red-400 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="flex gap-3 justify-end">

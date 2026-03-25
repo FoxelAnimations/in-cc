@@ -9,12 +9,14 @@ class LocationCategories extends Component
 {
     public bool $showModal = false;
     public string $name = '';
+    public string $color = '';
     public ?int $editingId = null;
 
     protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255', 'unique:location_categories,name' . ($this->editingId ? ",{$this->editingId}" : '')],
+            'color' => ['nullable', 'string', 'max:7', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ];
     }
 
@@ -29,6 +31,7 @@ class LocationCategories extends Component
         $category = LocationCategory::findOrFail($id);
         $this->editingId = $category->id;
         $this->name = $category->name;
+        $this->color = $category->color ?? '';
         $this->showModal = true;
     }
 
@@ -36,12 +39,14 @@ class LocationCategories extends Component
     {
         $this->validate();
 
+        $color = $this->color !== '' ? $this->color : null;
+
         if ($this->editingId) {
             $category = LocationCategory::findOrFail($this->editingId);
-            $category->update(['name' => $this->name]);
+            $category->update(['name' => $this->name, 'color' => $color]);
             session()->flash('status', 'Category updated.');
         } else {
-            LocationCategory::create(['name' => $this->name]);
+            LocationCategory::create(['name' => $this->name, 'color' => $color]);
             session()->flash('status', 'Category created.');
         }
 
@@ -63,7 +68,7 @@ class LocationCategories extends Component
 
     protected function resetForm(): void
     {
-        $this->reset(['name', 'editingId']);
+        $this->reset(['name', 'color', 'editingId']);
     }
 
     public function render()
